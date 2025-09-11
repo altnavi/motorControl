@@ -7,7 +7,7 @@ general se llevan a cabo habitualmente en las instalaciones que operan con estos
 sólo que vamos a implementar hardware de dimensiones más cómodas para trabajar.
 
 # Compilación
-Utilizamos también los siguientes archivos `cr_cpp_config.cpp cr_startup_lpc84x.cpp` provistos por NXP en MCUXpresso. No utilizamos RomDivide, Micro Trace Buffer, Code Read Protection.
+Utilizamos también los siguientes archivos `cr_cpp_config.cpp` `cr_startup_lpc84x.cpp` provistos por NXP en MCUXpresso. No utilizamos RomDivide, Micro Trace Buffer, Code Read Protection.
 
 # Objetivos
 ## Principales
