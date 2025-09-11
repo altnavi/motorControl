@@ -1,0 +1,23 @@
+# Ignore build outputs
+/Debug/
+/Release/
+/build/
+
+# Eclipse/MCUXpresso settings
+.metadata/
+.settings/
+.project
+.cproject
+*.launch
+
+# Logs and temporary files
+*.log
+*.swp
+*.tmp
+
+# Optional: ignore SDK if not modifying it
+# /SDK/
+
+# IDE indexer files
+/.mxproject
+/.mxresources
