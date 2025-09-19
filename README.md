@@ -20,7 +20,7 @@ No utilizamos RomDivide, Micro Trace Buffer, Code Read Protection.
 - [ ] Mostrar mediante una interfaz gráfica los estados actuales del motor, así como también los valores de velocidad a los que el mismo gira y los sentidos para los cuales lo hace
 ### TODO
 - [ ] Clase de comunicación
-    - [ ] Protocolo UART
+    - [x] Protocolo UART
     - [ ] Clase para ESP8266
 - [ ] Clase de motor
     - [ ] Relés
