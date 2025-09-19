@@ -2,22 +2,25 @@
 /Debug/
 /Release/
 /build/
+/out/
+/bin/
+/obj/
 
-# Eclipse/MCUXpresso settings
-.metadata/
-.settings/
-.project
-.cproject
+# IDE metadata to ignore
 *.launch
-
-# Logs and temporary files
 *.log
+.project.user
+
+.metadata/
+
+# MCUXpresso specific
+.settings/*.user.prefs
+.settings/org.eclipse.core.resources.prefs
+
+# Other
 *.swp
+*.swo
+*.bak
 *.tmp
-
-# Optional: ignore SDK if not modifying it
-# /SDK/
-
-# IDE indexer files
-/.mxproject
-/.mxresources
+*.DS_Store # MacOS
+Thumbs.db
