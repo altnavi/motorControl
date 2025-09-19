@@ -11,13 +11,14 @@
  */
 
 #include <cr_section_macros.h>
-
-// TODO: insert other include files here
+#include "LPC845.h"
+#include "Init.h"
 
 // TODO: insert other definitions and declarations here
 
 int main(void) {
 
+	Inicializar();
     // TODO: insert code here
 
     // Force the counter to be placed into memory
