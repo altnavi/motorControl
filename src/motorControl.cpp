@@ -10,6 +10,7 @@
 #include <LPC845.h>
 #include <DigitalInput.h>
 #include <serialCom.h>
+#include "../drivers/detectorGiro.h"
 
 uint8_t respuestaOK[] = {"LED N ENCENDIDO"};
 uint8_t bytesOK = 15;
@@ -17,6 +18,8 @@ uint8_t respuestaERROR[] = {"ERROR"};
 uint8_t bytesERROR = 5;
 
 int main(void) {
+
+	detectorGiro jose(0,1);
 
 	Inicializar();
 
