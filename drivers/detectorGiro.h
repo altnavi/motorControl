@@ -3,17 +3,39 @@
 
 #include "../firmware/LPC845.h"
 #include "../drivers/PinInt.h"
+#include "../drivers/Timer.h"
 
-void handler(void);
+void handler_sensor1(void);
+void handler_sensor2(void);
+void update(void);
 
-class detectorGiro {
-	PinInt sensor;
-	uint32_t rpm;
+class DetectorGiro {
+		Timer t1;
+		PinInt sensor1;
+		PinInt sensor2;
+		static DetectorGiro *p1;
+
+		uint32_t rpm;
+		uint32_t pulse1;
+		uint32_t pulse2;
+		uint32_t pulse1_seg; //lo actualizo cada 1 seg
+		uint32_t pulse2_seg; // ''
+
+		bool flag_sen1;
+		bool flag_sen2;
+
+		bool sentido;
 
 public:
-	detectorGiro(uint8_t port, uint8_t pin);
-	virtual ~detectorGiro();
-	friend void handler(void);
+		enum giro{HORARIO, ANTIHORARIO, NO_DETECTADO};
+
+		DetectorGiro(uint8_t port1, uint8_t pin1, uint8_t port2, uint8_t pin2);
+		uint32_t getRPM();
+		uint8_t getSentidoGiro();
+		virtual ~DetectorGiro();
+		friend void handler_sensor1(void);
+		friend void handler_sensor2(void);
+		friend void update(void);
 };
 
 #endif /* DETECTORGIRO_H_ */
