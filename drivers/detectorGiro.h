@@ -19,7 +19,7 @@ class DetectorGiro {
 		uint32_t pulse1;
 		uint32_t pulse2;
 		uint32_t pulse1_seg; //lo actualizo cada 1 seg
-		uint32_t pulse2_seg; // ''
+		uint32_t pulse2_seg; // por ahora no lo utilizo
 
 		bool flag_sen1;
 		bool flag_sen2;
