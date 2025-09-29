@@ -10,12 +10,12 @@ void handler_sensor2(void);
 void update(void);
 
 class DetectorGiro {
+protected:
 		Timer t1;
 		PinInt sensor1;
 		PinInt sensor2;
 		static DetectorGiro *p1;
 
-		uint32_t rpm;
 		uint32_t pulse1;
 		uint32_t pulse2;
 		uint32_t pulse1_seg; //lo actualizo cada 1 seg
