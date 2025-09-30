@@ -22,8 +22,18 @@ No utilizamos RomDivide, Micro Trace Buffer, Code Read Protection.
 - [ ] Clase de comunicación
     - [x] Protocolo UART
     - [ ] Clase para ESP8266
+- [ ] Sensores
+    - [x] Clase detectorGiro
+    - [x] Get rpm
 - [ ] Clase de motor
-    - [ ] Relés
-    - [ ] Sensor de RPM
+    - [ ] Pulsos frecuencia
+    - [ ] Set rpm
+    - [x] Apagar/Prender
 - [ ] Clase de sensor de temperatura
-- [x] Prueba xd 
+
+
+motor, driver - se controla con pulsos
+                Clase de pulsos
+
+
+2 sensor - detectorGiro
