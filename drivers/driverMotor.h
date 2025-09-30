@@ -16,6 +16,7 @@ private:
 	DetectorGiro sense;
 	uint32_t rpm;
 	uint8_t port1;
+	gpio *reset;
 public:
 	driverMotor(uint8_t _port1, uint8_t _pin1, uint8_t _port2, uint8_t _pin2, gpio);
 	void setRPM(uint8_t);

@@ -26,3 +26,4 @@ No utilizamos RomDivide, Micro Trace Buffer, Code Read Protection.
     - [ ] Relés
     - [ ] Sensor de RPM
 - [ ] Clase de sensor de temperatura
+- [x] Prueba xd 

@@ -22,11 +22,42 @@ int main(void) {
 
 	Inicializar();
 
+	enum est_posibles {APAGADO, GIRANDO, FALLA, QUILOMBO};
+	est_posibles estado = APAGADO;
+
 	while(1)
 	{
+		switch(estado)
+		{
+		case APAGADO:
+			if (pulsador.getPIN())
+			{
+				estado = GIRANDO;
+				ledOK.setPIN();
+			}
+			break;
 
+		case GIRANDO:
+			if (motor.RPM != LCD.RPM)
+				LCD.print(motor.RPM);
+			if (motor.RPM != RPMesperadas)
+			{
+				estado = FALLA;
+
+			}
+			break;
+
+		case FALLA:
+			break;
+
+		case QUILOMBO:
+			break;
+
+		default:
+			estado = QUILOMBO;
+			break;
+		}
 	}
 
     return 0 ;
 }
-
