@@ -17,10 +17,9 @@ class Timer : public PerifericoTemporizado {
 		uint32_t tiempo, recarga;
 		bool recargar;
 		void (*Handler) (void);
-		uint32_t resta;			//usado para decrementar mS o uS
 
 	public:
-		Timer ( uint32_t _tiempo , void (*_Handler) (void),bool us = false , bool _recargar = false );
+		Timer ( uint32_t _tiempo , void (*_Handler) (void) , bool _recargar = false );
 		~Timer();
 
 		void start ();

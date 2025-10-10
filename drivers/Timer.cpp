@@ -8,17 +8,12 @@
 #include "Timer.h"
 
 
-Timer::Timer ( uint32_t _tiempo , void (*_Handler) (void),bool us, bool _recargar)
+Timer::Timer ( uint32_t _tiempo , void (*_Handler) (void), bool _recargar)
 {
 	//Configuro el nuevo timer:
 	recarga = _tiempo;
 	Handler = _Handler;
 	recargar = _recargar;
-
-	if(us)
-		resta = 1000;
-	else	//mS
-		resta = 1;
 
 	//NO lo agrego a la lista de timers (porque lo hace PerifericoTemporizado):
 	/*Timer **aux = new Timer*[cant_timers+1];
@@ -33,14 +28,6 @@ Timer::Timer ( uint32_t _tiempo , void (*_Handler) (void),bool us, bool _recarga
 	timers = aux;
 	 */
 }
-
-//Timer::Timer ( uint32_t _tiempo , void (*_Handler) (void) , bool _recargar );
-//{
-//	recarga = _tiempo;
-//	Handler = _Handler;
-//	recargar = _recargar;
-//
-//}
 
 Timer::~Timer()
 {
@@ -78,10 +65,10 @@ void Timer::stop ()
 
 void Timer::handler ( void )
 {
-	if (tiempo >= 0)		//cambio de logica ! por > por si en uS me voy a los negativos
+	if ( tiempo != 0)
 	{
-		tiempo -= resta;
-		if (tiempo <= 0)		//cambio de logica ! por <= por si en uS me voy a los negativos
+		tiempo--;
+		if ( !tiempo )
 		{
 			Handler();
 			if (recargar)
