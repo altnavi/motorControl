@@ -25,7 +25,7 @@ class Timer : public PerifericoTemporizado {
 		void start ();
 		void stop ();
 		void handler ( void );
-
+		void setTime(uint32_t _time);
 
 };
 

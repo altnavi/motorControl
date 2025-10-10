@@ -18,7 +18,7 @@ int main(void) {
 	gpio sensor1(1,1,1,1);
 	gpio sensor2(1,1,1,1);
 
-	driverMotor(1,1,1,1, motor);
+	//driverMotor(1,1,1,1, motor);
 
 	Inicializar();
 
@@ -30,14 +30,17 @@ int main(void) {
 		switch(estado)
 		{
 		case APAGADO:
+			/*
 			if (pulsador.getPIN())
 			{
 				estado = GIRANDO;
 				ledOK.setPIN();
 			}
+			*/
 			break;
 
 		case GIRANDO:
+			/*
 			if (motor.RPM != LCD.RPM)
 				LCD.print(motor.RPM);
 			if (motor.RPM != RPMesperadas)
@@ -45,6 +48,7 @@ int main(void) {
 				estado = FALLA;
 
 			}
+			*/
 			break;
 
 		case FALLA:

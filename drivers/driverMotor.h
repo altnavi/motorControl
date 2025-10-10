@@ -11,19 +11,19 @@
 #include <detectorGiro.h>
 #include <gpio.h>
 
+void handler_motor();
+
 class driverMotor {
 private:
-	DetectorGiro sense;
-	uint32_t rpm;
-	uint8_t port1;
-	gpio *reset;
+	Timer t1;
+	gpio *motor;
 public:
-	driverMotor(uint8_t _port1, uint8_t _pin1, uint8_t _port2, uint8_t _pin2, gpio);
-	void setRPM(uint8_t);
-	void setSentido(bool);
-	void apagar();
-	void encender();
-
+	driverMotor(gpio*);
+	void setSentido(bool sentido);
+	void setVelocidad(uint8_t);
+	void encenderMotor();
+	void apagarMotor();
+	friend void handler_motor();
 	virtual ~driverMotor();
 
 };

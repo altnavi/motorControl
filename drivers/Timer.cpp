@@ -76,3 +76,8 @@ void Timer::handler ( void )
 		}
 	}
 }
+
+void Timer::setTime(uint32_t _time)
+{
+	recarga = _time;
+}

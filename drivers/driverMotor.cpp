@@ -7,20 +7,40 @@
 
 #include <driverMotor.h>
 
-driverMotor::setSentido(bool sentido)
+driverMotor * p_motor = nullptr;
+
+driverMotor::driverMotor(gpio*gp) :
+t1(1,handler_motor),
+motor(gp)
 {
-	setRPM(0);
-	if (sensor.getRPM() == 0)
-		reset->clrPIN();
-}
-
-driverMotor::driverMotor(uint8_t _port1, uint8_t _pin1, uint8_t _port2, uint8_t _pin2, gpio)
-:sense(_port1, _pin1, _port2, _pin2)
-{
-
-
+	p_motor=this;
 }
 
 driverMotor::~driverMotor() {
+	// TODO Auto-generated destructor stub
+}
 
+void driverMotor::setVelocidad(uint8_t c) // de 0 a 100
+{
+apagarMotor();
+motor->clrPIN();
+	if(c>0)
+	t1.setTime(c);
+encenderMotor();
+}
+
+void driverMotor::encenderMotor()
+{
+	t1.start();
+}
+
+void driverMotor::apagarMotor()
+{
+	t1.stop();
+}
+
+void handler_motor()
+{
+	p_motor->t1.start();
+	p_motor->motor->togglePIN();
 }
