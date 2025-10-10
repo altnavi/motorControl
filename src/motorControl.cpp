@@ -11,14 +11,21 @@
 #include "../drivers/detectorGiro.h"
 #include <gpio.h>
 #include <driverMotor.h>
+#include <Timer.h>
+
+void handlr();
+
+gpio motor(0,8,gpio::SALIDA,gpio::HIGH);
+Timer t1(2000,handlr);
+driverMotor m1(&motor);
 
 int main(void) {
 
-	gpio motor(1,1,1,1);
-	gpio sensor1(1,1,1,1);
-	gpio sensor2(1,1,1,1);
 
-	//driverMotor(1,1,1,1, motor);
+
+	m1.setVelocidad(5);
+	m1.encenderMotor();
+	t1.start();
 
 	Inicializar();
 
@@ -65,3 +72,15 @@ int main(void) {
 
     return 0 ;
 }
+
+void handlr()
+{
+	static uint8_t aux = 1;
+	aux ++;
+	if(aux>6)
+		aux=0;
+
+	m1.setVelocidad(aux);
+	t1.start();
+}
+
