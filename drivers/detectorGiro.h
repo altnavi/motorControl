@@ -1,30 +1,15 @@
 #ifndef DETECTORGIRO_H_
 #define DETECTORGIRO_H_
 
-#include "../firmware/LPC845.h"
-#include "../drivers/PinInt.h"
-#include "../drivers/Timer.h"
+#include "LPC845.h"
+#include "PinInt.h"
+#include "Timer.h"
 
 void handler_sensor1(void);
 void handler_sensor2(void);
 void update(void);
 
 class DetectorGiro {
-protected:
-		Timer t1;
-		PinInt sensor1;
-		PinInt sensor2;
-		static DetectorGiro *p1;
-
-		uint32_t pulse1;
-		uint32_t pulse2;
-		uint32_t pulse1_seg; //lo actualizo cada 1 seg
-		uint32_t pulse2_seg; // por ahora no lo utilizo
-
-		bool flag_sen1;
-		bool flag_sen2;
-
-		bool sentido;
 
 public:
 		enum giro{HORARIO, ANTIHORARIO, NO_DETECTADO};
@@ -36,6 +21,24 @@ public:
 		friend void handler_sensor1(void);
 		friend void handler_sensor2(void);
 		friend void update(void);
+
+protected:
+		Timer t1;
+		PinInt sensor1;
+		PinInt sensor2;
+
+		uint32_t pulse1;
+		uint32_t pulse2;
+		uint32_t pulse1_seg; //lo actualizo cada 1 seg
+		uint32_t pulse2_seg; // por ahora no lo utilizo
+
+		bool flag_sen1;
+		bool flag_sen2;
+
+		bool sentido_g;
+
+		volatile giro sentido = NO_DETECTADO;
+		volatile uint8_t ultimo_sensor = 0; // 0 = ninguno, 1 = sensor1, 2 = sensor2
 };
 
 #endif /* DETECTORGIRO_H_ */

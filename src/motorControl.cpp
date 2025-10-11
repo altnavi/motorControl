@@ -8,79 +8,52 @@
 #include <cr_section_macros.h>
 #include <Init.h>
 #include <LPC845.h>
-#include "../drivers/detectorGiro.h"
 #include <gpio.h>
 #include <driverMotor.h>
 #include <Timer.h>
+#include <detectorGiro.h>
+#include <digitalInput.h>
 
 void handlr();
 
 gpio motor(0,8,gpio::SALIDA,gpio::HIGH);
+gpio led(1,2,gpio::SALIDA,gpio::LOW);
+gpio invertir_giro(0,6,gpio::SALIDA, gpio::HIGH);
 Timer t1(2000,handlr);
 driverMotor m1(&motor);
+DetectorGiro dec(1,0,1,1);
+uint32_t rpm = 0;
+DigitalInput bot(0,4);
 
 int main(void) {
 
 
 
-	m1.setVelocidad(5);
+	m1.setVelocidad(1);
 	m1.encenderMotor();
 	t1.start();
 
 	Inicializar();
 
-	enum est_posibles {APAGADO, GIRANDO, FALLA, QUILOMBO};
-	est_posibles estado = APAGADO;
-
 	while(1)
 	{
-		switch(estado)
+		if(bot.getKey())
 		{
-		case APAGADO:
-			/*
-			if (pulsador.getPIN())
-			{
-				estado = GIRANDO;
-				ledOK.setPIN();
-			}
-			*/
-			break;
-
-		case GIRANDO:
-			/*
-			if (motor.RPM != LCD.RPM)
-				LCD.print(motor.RPM);
-			if (motor.RPM != RPMesperadas)
-			{
-				estado = FALLA;
-
-			}
-			*/
-			break;
-
-		case FALLA:
-			break;
-
-		case QUILOMBO:
-			break;
-
-		default:
-			estado = QUILOMBO;
-			break;
+			invertir_giro.togglePIN();
 		}
-	}
+    }
 
-    return 0 ;
+	return 0 ;
 }
 
 void handlr()
 {
-	static uint8_t aux = 1;
-	aux ++;
-	if(aux>6)
-		aux=0;
-
-	m1.setVelocidad(aux);
+	rpm = dec.getRPM();
+	uint8_t g = dec.getSentidoGiro();
+	if (g == DetectorGiro::ANTIHORARIO)
+		led.setPIN();
+	else
+		led.clrPIN();
 	t1.start();
 }
 

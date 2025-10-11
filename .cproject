@@ -267,4 +267,5 @@
 			<resource resourceType="PROJECT" workspacePath="/motorControl"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="openCmsis"/>
 </cproject>
