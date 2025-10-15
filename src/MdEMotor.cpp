@@ -40,7 +40,7 @@ void MdEMotor (void)
 		}
 		else if(botonArranque.getPIN())
 		{
-			motor1.encenderMotor;
+			motor1.encenderMotor();
 			RPMtimer.start();
 			estado = GIRANDO;
 		}
