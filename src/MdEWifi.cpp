@@ -170,18 +170,28 @@ void miCallbackDeResultado(AT_Result resultado) {
 }
 
  void procesarMensajeCliente(const char* data) {
-    if (strcmp(data, "LED_ON") == 0) {
-        led_wifi_OK.setPIN();
-        pc.Transmitir((uint8_t*)"LED encendido\r\n", 15);
-    } else if (strcmp(data, "LED_OFF") == 0) {
-        led_wifi_OK.clrPIN();
-        pc.Transmitir((uint8_t*)"LED apagado\r\n", 13);
+    if (strcmp(data, "motor_ON") == 0) {
+        motor.setPIN();
+        pc.Transmitir((uint8_t*)"motor encendido\r\n", 15);
+    } else if (strcmp(data, "motor_OFF") == 0) {
+    	motor.clrPIN();
+        pc.Transmitir((uint8_t*)"motor apagado\r\n", 13);
     } else if (strncmp(data, "RPM=", 4) == 0) {
-        rpm = atoi(data + 4);
-        char buffer_respuesta[40];
-        sprintf(buffer_respuesta, "RPM objetivo actualizado a: %d\r\n", rpm);
-        pc.Transmitir((uint8_t*)buffer_respuesta, strlen(buffer_respuesta));
-    } else {
+        //rpm = atoi(data + 4);
+        //char buffer_respuesta[40];
+        //sprintf(buffer_respuesta, "RPM objetivo actualizado a: %d\r\n", rpm);
+        //pc.Transmitir((uint8_t*)buffer_respuesta, strlen(buffer_respuesta));
+    }
+    else if(strcmp(data, "aumentar") == 0) //aumenta la velocidad del motor
+	{
+    	pc.Transmitir((uint8_t*)"velocidad aumentada\r\n", 22);
+	}
+    else if(strcmp(data, "disminuir") == 0) //disminuye la velocidad del motor
+	{
+    	pc.Transmitir((uint8_t*)"velocidad disminuida\r\n", 22);
+	}
+	else
+	{
         pc.Transmitir((uint8_t*)"Comando desconocido\r\n", 22);
     }
 }

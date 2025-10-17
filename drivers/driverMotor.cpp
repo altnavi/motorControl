@@ -39,6 +39,11 @@ void driverMotor::apagarMotor()
 	t1.stop();
 }
 
+void driverMotor::setSentido(bool sentido)
+{
+
+}
+
 void handler_motor()
 {
 	p_motor->t1.start();

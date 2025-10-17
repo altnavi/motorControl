@@ -41,6 +41,7 @@ extern AT_Result resultado_AT;
 extern bool comunicacionOK;
 extern Estado_Envio_Wifi estadoEnvio;
 extern bool cliente_conectado;
+extern gpio motor;
 
 // --- Buffer ---
 extern char bufferRespuesta[RESPUESTA_MAX_LEN];

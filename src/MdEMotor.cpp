@@ -107,4 +107,17 @@ void MdEMotor (void)
 	}
 }
 
+void handler_RPMtimer()
+{
 
+}
+
+void handler_alarmatimer()
+{
+
+}
+
+void handler_actualizarDatos()
+{
+
+}

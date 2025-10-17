@@ -15,7 +15,9 @@
 
 void MdEMotor (void);
 void InicializarMdE (void);
-
+void handler_RPMtimer();
+void handler_alarmatimer();
+void handler_actualizarDatos();
 
 extern Timer RPMtimer;
 extern Timer alarmatimer;
