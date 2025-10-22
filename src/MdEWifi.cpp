@@ -171,10 +171,10 @@ void miCallbackDeResultado(AT_Result resultado) {
 
  void procesarMensajeCliente(const char* data) {
     if (strcmp(data, "motor_ON") == 0) {
-        motor.setPIN();
+        motor1.encenderMotor();
         pc.Transmitir((uint8_t*)"motor encendido\r\n", 15);
     } else if (strcmp(data, "motor_OFF") == 0) {
-    	motor.clrPIN();
+    	motor1.apagarMotor();
         pc.Transmitir((uint8_t*)"motor apagado\r\n", 13);
     } else if (strncmp(data, "RPM=", 4) == 0) {
         //rpm = atoi(data + 4);
@@ -184,10 +184,28 @@ void miCallbackDeResultado(AT_Result resultado) {
     }
     else if(strcmp(data, "aumentar") == 0) //aumenta la velocidad del motor
 	{
+    	if(velocidad>0)
+    	velocidad--;
+
+    	motor1.setVelocidad(velocidad);
     	pc.Transmitir((uint8_t*)"velocidad aumentada\r\n", 22);
+
 	}
     else if(strcmp(data, "disminuir") == 0) //disminuye la velocidad del motor
 	{
+    	if(velocidad<5)
+    	velocidad++;
+
+    	motor1.setVelocidad(velocidad);
+    	pc.Transmitir((uint8_t*)"velocidad disminuida\r\n", 22);
+	}
+    else if(strcmp(data, "invertir") == 0) //disminuye la velocidad del motor
+	{
+    	if(sentido_giro==DetectorGiro::ANTIHORARIO)
+    		motor1.setSentido(DetectorGiro::HORARIO);
+    	else
+    		motor1.setSentido(DetectorGiro::ANTIHORARIO);
+
     	pc.Transmitir((uint8_t*)"velocidad disminuida\r\n", 22);
 	}
 	else

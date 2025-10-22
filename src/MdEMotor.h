@@ -37,7 +37,7 @@ extern gpio led;
 extern gpio alarma;
 
 extern uint32_t velocidad;
-extern bool sentido_giro;
+extern uint8_t sentido_giro;
 extern bool flag_RPMtimer;
 extern bool flag_alarmatimer;
 extern bool flag_actualizarDatos;

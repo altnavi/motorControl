@@ -9,21 +9,24 @@
 
 driverMotor * p_motor = nullptr;
 
-driverMotor::driverMotor(gpio*gp) :
+driverMotor::driverMotor(gpio _motor,gpio _sentido) :
 t1(1,handler_motor),
-motor(gp)
+t_sentido(200,handler_invertir),
+gpio_motor(_motor)
 {
+	sentidoGiro = _sentido;
 	p_motor=this;
+
 }
 
 driverMotor::~driverMotor() {
-	// TODO Auto-generated destructor stub
+
 }
 
 void driverMotor::setVelocidad(uint8_t c) // de 0 a 100
 {
 apagarMotor();
-motor->clrPIN();
+gpio_motor.clrPIN();
 	if(c>0)
 	t1.setTime(c);
 encenderMotor();
@@ -37,15 +40,23 @@ void driverMotor::encenderMotor()
 void driverMotor::apagarMotor()
 {
 	t1.stop();
+	gpio_motor.clrPIN();
 }
 
 void driverMotor::setSentido(bool sentido)
 {
-
+	apagarMotor();
+	sentidoGiro.togglePIN();
+	t_sentido.start();
 }
 
 void handler_motor()
 {
 	p_motor->t1.start();
-	p_motor->motor->togglePIN();
+	p_motor->gpio_motor.togglePIN();
+}
+
+void handler_invertir()
+{
+	p_motor->encenderMotor();
 }

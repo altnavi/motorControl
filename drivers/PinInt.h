@@ -45,6 +45,8 @@ class PinInt {
 		~PinInt();
 
 		void configIntExt ();
+		void deshabilitarINT();
+		void habilitarINT();
 
 		friend void PININT0_IRQHandler (void);
 		friend void PININT1_IRQHandler (void);

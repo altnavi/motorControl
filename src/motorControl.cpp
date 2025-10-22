@@ -22,10 +22,12 @@ void actualizarGUI();
 #define gpio_botonParada 0,0
 #define gpio_botonVelocidad 0,0
 #define gpio_botonCambioSentido 0,0
-#define gpio_cambioSentido 0,0
+#define gpio_cambioSentido 0,18
 #define gpio_led_falla 0,0
 #define gpio_alarma 0,0
-#define gpio_motor 0,0
+#define gpio_motor 0,6
+#define gpio_sensor1 0,16
+#define gpio_sensor2 0,17
 
 //  GPIOS
 gpio led_wifi_OK(1,0,gpio::SALIDA, gpio::LOW);
@@ -56,22 +58,25 @@ char buffer_envio[128]; // Buffer para crear los mensajes JSON
 float temperatura_motor = 45.5;
 
 uint32_t velocidad;
-bool sentido_giro = false;
+uint8_t sentido_giro = 2;
 bool flag_RPMtimer;
-bool flag_alarmatimer = true;
+bool flag_alarmatimer = false;
 bool flag_actualizarDatos;
 
-driverMotor motor1(&motor);
+//MOTOR
+driverMotor motor1(motor,cambioSentido);
+DetectorGiro d1(gpio_sensor1, gpio_sensor2);
 
 int main(void) {
 	Inicializar();
-	InicializarMdE();
+	//InicializarMdE();
     Wifi_Init();
     handler_envio_datos.start();
 
     while(1) {
         Wifi_Manejar();
-        MdEMotor();
+        d1.procesar();
+        //MdEMotor();
     }
 
     return 0;
@@ -80,16 +85,19 @@ int main(void) {
 
 void actualizarGUI() //actualizamos datos de la interfaz grafica
 {
+	rpm = d1.getRPM();
+	sentido_giro = d1.getSentidoGiro();
+
 	sprintf(buffer_envio,
 	        "{"
 	        "\"rpm\": %d, "
 	        "\"temp\": %.1f, "
-	        "\"sentido\": %s, "
+	        "\"sentido\": %d, "
 	        "\"alarma\": %s"
 	        "}\r\n",
 	        rpm,
 	        temperatura_motor,
-	        sentido_giro ? "true" : "false",
+	        sentido_giro,
 	        flag_alarmatimer ? "true" : "false");
 
 

@@ -19,7 +19,6 @@ PinInt::PinInt( uint8_t port , uint8_t pin , tipos_trigger trig , void (*h) (voi
 	intext[cant_pinInt] = this;
 
 	cant_pinInt++;
-
 	//Habilito el clk del perisferico PIN INTERRUPT
 	SYSCON->SYSAHBCLKCTRL0 |= 1 << 28;
 
@@ -43,6 +42,16 @@ PinInt::~PinInt()
 
 	//Deshabilito flanco y nivel de esta fuente de interrupcion:
 	configIntExt();
+}
+
+void PinInt::deshabilitarINT()
+{
+	//ICER0 |= 1 << (24+fuente);
+}
+
+void PinInt::habilitarINT()
+{
+	//configIntExt();
 }
 
 

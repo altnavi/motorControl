@@ -7,7 +7,6 @@
 
 #include "Systick.h"
 
-
 void InitSystick ( void )
 {
 	//Inicializo el Systick para que interrumpa cada 1mseg:

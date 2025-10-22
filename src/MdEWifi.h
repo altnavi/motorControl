@@ -9,7 +9,8 @@
 #include <gpio.h>
 #include <DigitalInput.h>
 #include <Timer.h>
-
+#include <detectorGiro.h>
+#include <driverMotor.h>
 
 // =================================================================
 // == TIPOS Y ENUMS GLOBALES
@@ -41,7 +42,8 @@ extern AT_Result resultado_AT;
 extern bool comunicacionOK;
 extern Estado_Envio_Wifi estadoEnvio;
 extern bool cliente_conectado;
-extern gpio motor;
+extern driverMotor motor1;
+extern DetectorGiro d1;
 
 // --- Buffer ---
 extern char bufferRespuesta[RESPUESTA_MAX_LEN];
@@ -63,5 +65,7 @@ extern Timer led_wifi_inter;
 
 // --- Datos de Aplicación ---
 extern uint32_t rpm;
+extern uint32_t velocidad;
+extern uint8_t sentido_giro;
 
 #endif /* MDEWIFI_H_ */
