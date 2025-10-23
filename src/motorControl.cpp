@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <MdEMotor.h>
 #include <Timer.h>
+#include <Temperatura.h>
 
 void actualizarGUI();
 
