@@ -34,7 +34,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::conectarServidor()
 {
-    QString ip = "192.168.1.38";
+    QString ip = "10.189.78.48";
     quint16 port = 5000;
 
     qDebug() << "Conectando a" << ip << ":" << port << "...";

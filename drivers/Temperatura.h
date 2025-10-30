@@ -2,7 +2,9 @@
 #define TEMPERATURA_H_
 
 #include <LPC845.h>
+#include <math.h>
 #include <PerifericoTemporizado.h>
+#include <AnalogInput.h>
 
 #define CANT_DIVISIONES 100
 
@@ -10,25 +12,21 @@ class Temperatura : public PerifericoTemporizado {
 
 protected:
 	float valor_temperatura;
-	uint32_t Rfija_kOhm = 10;   // Resistencia conocida para el divisor de voltaje
-	const float Vref = 3.3;
-	float cuentas;			//Resultado del main
-	float Rterm_kOhm;
+	    uint32_t Rfija;    	// Resistencia conocida para el divisor de voltaje
+		uint32_t R0; //resistencia del ntc a 19.6°c (temp de muestra)
+		float T0; //temp de referencia en kelvin
+		float cuentas;		//resultado del main
+		float beta; //constante beta del ntc
+		float vref;	//tension de referencia del adc
+		uint32_t adc_res; //resolucion del adc 10 bits
+		uint8_t muestras; //numero de muestras
 
-	struct tabla_base {
-	    float min;
-	    float max;
-	    uint32_t valor;
-	};
-
-
+		AnalogInput A1;
 
 public:
-	Temperatura ();
-	uint32_t getTemperatura();	//°C
+	Temperatura (uint8_t canal);
+	float getTemperatura();	//°C
 	void handler();
-
-	tabla_base tabla[CANT_DIVISIONES];
 
 };
 

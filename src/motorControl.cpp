@@ -56,7 +56,7 @@ Timer actualizarDatos(1000,handler_actualizarDatos);
 //VARIABLES
 uint32_t rpm;
 char buffer_envio[128]; // Buffer para crear los mensajes JSON
-float temperatura_motor = 45.5;
+float temperatura_motor = 0;
 
 uint32_t velocidad;
 uint8_t sentido_giro = 2;
@@ -67,6 +67,8 @@ bool flag_actualizarDatos;
 //MOTOR
 driverMotor motor1(motor,cambioSentido);
 DetectorGiro d1(gpio_sensor1, gpio_sensor2);
+
+Temperatura t1(6);
 
 int main(void) {
 	Inicializar();
@@ -88,6 +90,7 @@ void actualizarGUI() //actualizamos datos de la interfaz grafica
 {
 	rpm = d1.getRPM();
 	sentido_giro = d1.getSentidoGiro();
+	temperatura_motor = t1.getTemperatura();
 
 	sprintf(buffer_envio,
 	        "{"
