@@ -1,8 +1,6 @@
 #include "MdEWifi.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
+///INICIALIZACIONES
 volatile AT_State estadoComando = AT_IDLE;
 Estado_wifi wifi_State = WIFI_NONE;
 const char* comandoPendiente = NULL;
@@ -19,10 +17,14 @@ char bufferPayload[RESPUESTA_MAX_LEN];
 uint16_t lenPayload = 0;
 bool cliente_conectado = false;
 
-void procesarMensajeCliente(const char* data);
-void detectarMensajeIPD(char* linea);
-bool iniciarEnvioComando(const char* comando, uint32_t timeout_ms, at_callback_t callback);
-void manejarComunicacionAT();
+//////////////////////
+
+
+bool Wifi_EstaOcupado() {
+    // Devuelve true si la máquina de estados
+    // NO está en IDLE (WIFI_ENVIO_DATOS, etc.)
+    return (wifi_State != WIFI_ENVIO_DATOS) || (estadoComando != AT_IDLE);
+}
 
 void Wifi_Init(void) {
 	led_wifi_inter.stop();
@@ -37,9 +39,19 @@ void Wifi_Manejar(void) {
 
     if (estadoEnvio == ENVIO_INICIANDO_CIPSEND && estadoComando == AT_IDLE) {
         // La máquina AT está libre, podemos enviar el comando CIPSEND
-        char comandoCipsend[32];
-        sprintf(comandoCipsend, "AT+CIPSEND=0,%d\r\n", lenPayload);
-        iniciarEnvioComando(comandoCipsend, 2000, callback_CIPSEND);
+        static char comandoCipsend[32];
+        int bytes_escritos = formato_cipsend_economico(
+                    comandoCipsend,
+                    32, // <-- Le pasamos el tamaño para seguridad
+                    lenPayload
+                );
+        if (bytes_escritos > 0) {
+                    iniciarEnvioComando(comandoCipsend, 3000, callback_CIPSEND);
+                } else {
+                    // El comando no cupo en el búfer de 32 bytes.
+                    // (sprintf se habría colgado aquí)
+                    pc.Transmitir((uint8_t*)"ERROR: Buffer CIPSEND muy pequeño!\r\n", 36);
+                }
     }
 
     if (bot.getKey()) {
@@ -82,7 +94,7 @@ void Wifi_Manejar(void) {
                 } else if (resultado_AT == AT_RESULT_TIMEOUT || resultado_AT == AT_RESULT_ERROR) {
                     wifi_State = WIFI_FALLA;
                 } else {
-                    iniciarEnvioComando("AT+CWJAP=\"motorola\",\"luciano123\"\r\n", 10000, miCallbackDeResultado);
+                    iniciarEnvioComando("AT+CWJAP=\"Personal-675\",\"GJtDPuJa8A\"\r\n", 10000, miCallbackDeResultado);
                 }
             }
             break;
@@ -259,43 +271,55 @@ void miCallbackDeResultado(AT_Result resultado) {
  }
 
  void manejarComunicacionAT() {
-    int16_t b = esp.Recibir();
-    if (b != serialCom::NO_DATA) {
-        char c = (char)b;
-        if (bufferIndex < RESPUESTA_MAX_LEN - 1) {
-            bufferRespuesta[bufferIndex++] = c;
-        }
+	 int16_t b = esp.Recibir();
+	     if (b != serialCom::NO_DATA) {
+	         char c = (char)b;
+	         if (bufferIndex < RESPUESTA_MAX_LEN - 1) {
+	             bufferRespuesta[bufferIndex++] = c;
+	         }
 
-        if (c == '\n') {
-            bufferRespuesta[bufferIndex] = '\0';
-            pc.Transmitir((uint8_t*)bufferRespuesta, bufferIndex);
-                if (strstr(bufferRespuesta, "CONNECT") != NULL) {
-                    cliente_conectado = true;
-                    pc.Transmitir((uint8_t*)"[INFO] Cliente Conectado.\r\n", 28);
-                } else if (strstr(bufferRespuesta, "CLOSED") != NULL) {
-                    cliente_conectado = false;
-                    pc.Transmitir((uint8_t*)"[INFO] Cliente Desconectado.\r\n", 30);
-                }
+	         if (c == '\n') {
+	             bufferRespuesta[bufferIndex] = '\0';
+	             pc.Transmitir((uint8_t*)bufferRespuesta, bufferIndex); // Echo a la PC
 
-            if (strncmp(bufferRespuesta, "+IPD,", 5) == 0) {
-                detectarMensajeIPD(bufferRespuesta);
-            } else if (estadoComando == AT_WAITING_RESPONSE) {
-                if (strstr(bufferRespuesta, "OK") != NULL) {
-                    timeout_timer.stop();
-                    if (comandoCallback != NULL) comandoCallback(AT_RESULT_OK);
-                    resultado_AT = AT_RESULT_OK;
-                    estadoComando = AT_IDLE;
-                } else if (strstr(bufferRespuesta, "ERROR") != NULL) {
-                    timeout_timer.stop();
-                    if (comandoCallback != NULL) comandoCallback(AT_RESULT_ERROR);
-                    resultado_AT = AT_RESULT_ERROR;
-                    estadoComando = AT_IDLE;
-                }
-            }
-            bufferIndex = 0;
-            memset(bufferRespuesta, 0, RESPUESTA_MAX_LEN);
-        }
-    }
+	             // --- INICIO DE LA CORRECCIÓN ---
+	             // "SEND OK" es un URC (Unsolicited Result Code) que esperamos
+	             // después de enviar un payload. Debe detectarse aquí.
+	             if (strstr(bufferRespuesta, "SEND OK") != NULL) {
+	                 // ¡Éxito! El payload fue recibido.
+	                 // Esta es la línea que completa el ciclo y arregla tu bug.
+	                 estadoEnvio = ENVIO_IDLE;
+	             }
+	             // --- FIN DE LA CORRECCIÓN ---
+
+	             // (El resto de tu lógica)
+	             else if (strstr(bufferRespuesta, "CONNECT") != NULL) { // Añadí 'else if'
+	                 cliente_conectado = true;
+	                 pc.Transmitir((uint8_t*)"[INFO] Cliente Conectado.\r\n", 28);
+	             } else if (strstr(bufferRespuesta, "CLOSED") != NULL) {
+	                 cliente_conectado = false;
+	                 pc.Transmitir((uint8_t*)"[INFO] Cliente Desconectado.\r\n", 30);
+	             }
+
+	             if (strncmp(bufferRespuesta, "+IPD,", 5) == 0) {
+	                 detectarMensajeIPD(bufferRespuesta);
+	             } else if (estadoComando == AT_WAITING_RESPONSE) {
+	                 if (strstr(bufferRespuesta, "OK") != NULL) {
+	                     timeout_timer.stop();
+	                     if (comandoCallback != NULL) comandoCallback(AT_RESULT_OK);
+	                     resultado_AT = AT_RESULT_OK;
+	                     estadoComando = AT_IDLE;
+	                 } else if (strstr(bufferRespuesta, "ERROR") != NULL) {
+	                     timeout_timer.stop();
+	                     if (comandoCallback != NULL) comandoCallback(AT_RESULT_ERROR);
+	                     resultado_AT = AT_RESULT_ERROR;
+	                     estadoComando = AT_IDLE;
+	                 }
+	             }
+	             bufferIndex = 0;
+	             memset(bufferRespuesta, 0, RESPUESTA_MAX_LEN);
+	         }
+	     }
 
     switch (estadoComando) {
         case AT_IDLE:
@@ -325,13 +349,23 @@ void miCallbackDeResultado(AT_Result resultado) {
 }
 
  void callback_CIPSEND(AT_Result resultado) {
-     if (resultado == AT_RESULT_OK) {
-         // El comando fue aceptado, ahora enviamos el payload (el mensaje real)
-         esp.Transmitir((uint8_t*)bufferPayload, lenPayload);
-     } else {
-         // El comando falló, informamos el error
-         pc.Transmitir((uint8_t*)"[ERROR] Falla en CIPSEND.\r\n", 28);
-     }
-     // El proceso de envío terminó (con éxito o fracaso), liberamos la máquina
-     estadoEnvio = ENVIO_IDLE;
- }
+      if (resultado == AT_RESULT_OK) {
+          // El comando fue aceptado (recibimos el '>')
+          // Ahora enviamos el payload (el mensaje real)
+          esp.Transmitir((uint8_t*)bufferPayload, lenPayload);
+
+          // --- CORRECCIÓN ---
+          // El envío NO ha terminado.
+          // Ahora estamos esperando que el ESP responda "SEND OK".
+          estadoEnvio = ESPERANDO_SEND_OK;
+          // --- FIN CORRECCIÓN ---
+
+      } else {
+          // El comando falló, informamos el error
+          pc.Transmitir((uint8_t*)"[ERROR] Falla en CIPSEND.\r\n", 28);
+
+          // Aquí SÍ vamos a IDLE, porque la transacción falló y se abortó.
+          estadoEnvio = ENVIO_IDLE;
+      }
+      // ¡Quitamos el 'estadoEnvio = ENVIO_IDLE;' de aquí fuera!
+  }

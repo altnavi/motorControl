@@ -11,17 +11,23 @@
 #include <Timer.h>
 #include <detectorGiro.h>
 #include <driverMotor.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "StringFormatter.h"
+
 
 // =================================================================
 // == TIPOS Y ENUMS GLOBALES
 // =================================================================
 #define RESPUESTA_MAX_LEN 128
+#define TAMANO_BUFFER_WIFI 128 // Debe ser igual (o mayor) a tu buffer_envio
 
 typedef enum { AT_RESULT_OK, AT_RESULT_ERROR, AT_RESULT_TIMEOUT, AT_RESULT_NONE } AT_Result;
 typedef enum { AT_IDLE, AT_SEND_COMMAND, AT_WAITING_RESPONSE } AT_State;
 typedef enum { WIFI_NONE, WIFI_DESCONECTADO, WIFI_MODO_CONFIG, WIFI_CONECTANDO, WIFI_OBTENIENDO_IP, WIFI_CONECTADO, WIFI_INIT_SERVER, WIFI_ENVIO_DATOS, WIFI_FALLA } Estado_wifi;
 typedef void (*at_callback_t)(AT_Result resultado);
-typedef enum { ENVIO_IDLE, ENVIO_INICIANDO_CIPSEND } Estado_Envio_Wifi;
+typedef enum { ENVIO_IDLE, ENVIO_INICIANDO_CIPSEND,ESPERANDO_SEND_OK} Estado_Envio_Wifi;
 
 
 void Wifi_Init(void);
@@ -31,6 +37,12 @@ void timeout_handler(void);
 void miCallbackDeResultado(AT_Result resultado);
 void wifi_intermitente_handler();
 void callback_CIPSEND(AT_Result resultado);
+bool Wifi_EstaOcupado();
+void procesarMensajeCliente(const char* data);
+void detectarMensajeIPD(char* linea);
+bool iniciarEnvioComando(const char* comando, uint32_t timeout_ms, at_callback_t callback);
+void manejarComunicacionAT();
+
 
 // --- Máquina de Estados ---
 extern volatile AT_State estadoComando;

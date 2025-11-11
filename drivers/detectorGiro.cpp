@@ -4,8 +4,8 @@
 DetectorGiro *p1 = nullptr;
 
 DetectorGiro::DetectorGiro(uint8_t port1, uint8_t pin1,uint8_t port2, uint8_t pin2)
-:  sensor1(port1, pin1, PinInt::flanco_asc,handler_sensor1),
-   sensor2(port2, pin2, PinInt::flanco_asc, handler_sensor2)
+:  sensor1(port1, pin1, PinInt::flanco_desc,handler_sensor1),
+   sensor2(port2, pin2, PinInt::flanco_desc, handler_sensor2)
 {
   p1 = this;
   system_millis = 0;
