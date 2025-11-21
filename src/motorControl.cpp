@@ -16,9 +16,13 @@
 #include <Timer.h>
 #include <Temperatura.h>
 #include "StringFormatter.h"
+#include <i2cCom.h>
+#include <stdio.h>
 
 
 void actualizarGUI();
+void lcd_sendCmd(I2C_COM &i2c, uint8_t cmd);
+
 
 #define gpio_botonArranque 0,0
 #define gpio_botonParada 0,0
@@ -73,11 +77,83 @@ DetectorGiro d1(gpio_sensor1, gpio_sensor2);
 
 Temperatura t1(6);
 
+I2C_COM i2c;
+
+
+// --- FUNCIONES AUXILIARES DE RETARDO (BLOQUEANTES) ---
+void delay_ms(uint32_t ms) {
+    for(volatile uint32_t i = 0; i < (ms); i++) { __asm("NOP"); }
+}
+
+// --- FUNCIONES DE BAJO NIVEL LCD ---
+void lcd_sendNibble(uint8_t nibble, uint8_t is_data) {
+    uint8_t byte = nibble & 0xF0;
+
+    byte |= 0x08; // Backlight ON (Bit 3)
+    if (is_data) byte |= 0x01; // RS = 1 para datos, 0 para comandos
+
+    // Pulse EN (Bit 2)
+    // 1. Enable High
+    i2c.write(byte | 0x04);
+    // 2. Enable Low (Latch)
+    i2c.write(byte & ~0x04);
+}
+
+void lcd_cmd(uint8_t cmd) {
+    lcd_sendNibble(cmd, 0);       // Parte alta
+    lcd_sendNibble(cmd << 4, 0);  // Parte baja
+}
+
+void lcd_data(uint8_t data) {
+    lcd_sendNibble(data, 1);      // Parte alta
+    lcd_sendNibble(data << 4, 1); // Parte baja
+}
+
+void lcd_init() {
+    //delay_ms(50); // Esperar a que el voltaje se estabilice
+
+    // Secuencia mágica de inicialización (Modo 4 bits)
+    lcd_sendNibble(0x30, 0); delay_ms(5);
+    lcd_sendNibble(0x30, 0); delay_ms(1);
+    lcd_sendNibble(0x30, 0); delay_ms(1);
+    lcd_sendNibble(0x20, 0); delay_ms(1); // Set 4-bit mode
+
+    // Configuración
+    lcd_cmd(0x28); // Function set: 4-bit, 2 lines, 5x8 dots
+    delay_ms(1);
+    lcd_cmd(0x0C); // Display ON, Cursor OFF, Blink OFF
+    delay_ms(1);
+    lcd_cmd(0x01); // Clear Display
+    delay_ms(2);
+    lcd_cmd(0x06); // Entry mode: Increment cursor
+}
+
+void lcd_print(const char* str) {
+    while (*str) {
+        lcd_data(*str++);
+    }
+}
+
+void lcd_printInt(int num) {
+    char buffer[16];
+    // snprintf convierte el int a una cadena de texto
+    snprintf(buffer, sizeof(buffer), "%d", num);
+    lcd_print(buffer);
+}
+
+void lcd_setCursor(uint8_t col, uint8_t row) {
+    uint8_t offset[] = {0x00, 0x40, 0x14, 0x54};
+    lcd_cmd(0x80 | (col + offset[row]));
+}
+
 int main(void) {
 	Inicializar();
+
 	InicializarMdE();
     Wifi_Init();
     handler_envio_datos.start();
+
+    lcd_init();
 
     while(1) {
         Wifi_Manejar();
@@ -88,9 +164,16 @@ int main(void) {
     return 0;
 }
 
-
 void actualizarGUI() //actualizamos datos de la interfaz grafica
 {
+    lcd_setCursor(0, 0);
+    lcd_print("Hola Mundo!");
+    lcd_setCursor(0, 1);
+    lcd_print("RPM:");
+    lcd_print("123");
+	lcd_setCursor(5, 1);
+    lcd_printInt(123);
+
 	rpm = d1.getRPM();
 	sentido_giro = d1.getSentidoGiro();
 	temperatura_motor = t1.getTemperatura();
@@ -100,23 +183,15 @@ void actualizarGUI() //actualizamos datos de la interfaz grafica
 	        return;
 	    }
 
-	// --- INICIO DEL CAMBIO ---
-
-	// Llamamos a la nueva función económica.
-	// Le pasamos el búfer Y su tamaño total para seguridad.
 	int bytes_escritos = formato_json_economico(
 	    buffer_envio,
-	    TAMANO_BUFFER_ENVIO, // <-- Seguridad contra desbordamiento
+	    TAMANO_BUFFER_ENVIO, // Seguridad contra desbordamiento
 	    rpm,
 	    temperatura_motor,
 	    sentido_giro,
 	    flag_alarmatimer
 	);
-    // --- FIN DEL CAMBIO ---
 
-    // --- MEJORA DE SEGURIDAD ---
-    // Si bytes_escritos es -1, el búfer fue muy pequeño.
-    // No deberíamos enviar datos corruptos.
 	if (bytes_escritos > 0)
     {
         if(!Wifi_EnviarDato(buffer_envio)) //realizamos el envio de datos solo si estamos conectados
@@ -126,10 +201,11 @@ void actualizarGUI() //actualizamos datos de la interfaz grafica
     }
     else
     {
-        // El JSON no cupo en el búfer. ¡Esto es un error grave!
-        // (En el pasado, 'sprintf' habría colgado tu LPC aquí)
         pc.Transmitir((uint8_t*)"ERROR: Buffer de envío demasiado pequeño!\r\n", 40);
     }
 
 	handler_envio_datos.start();
 }
+
+
+

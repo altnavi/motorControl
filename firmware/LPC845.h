@@ -2,7 +2,7 @@
  * lpc845.h
  *
  *  Created on: 2 abr. 2023
- *      Author: chor
+ *      Author: "chor" --> ELIAS LO MODIFICO...
  */
 
 #ifndef LPC845_H_
@@ -321,39 +321,75 @@ typedef struct {
 #define SYSTICK                                     ((SYSTICK_Types *)SYSTICK_BASE)
 
 typedef struct {
-  __IO uint32_t CFG;
-  __IO uint32_t CTL;
-  __IO uint32_t STAT;
-  __IO uint32_t INTENSET;
-  __IO uint32_t INTENCLR;
-  __IO uint32_t RXDAT;
-  __IO uint32_t RXDATSTAT;
-  __IO uint32_t TXDAT;
-  __IO uint32_t BRG;
-  __IO uint32_t INTSTAT;
-  __IO uint32_t OSR;
-  __IO uint32_t ADDR;
-
-} USARTs;
+   volatile uint32_t CFG;
+   volatile uint32_t CTL;
+   volatile uint32_t STAT;
+   volatile uint32_t INTENSET;
+   volatile uint32_t INTENCLR;
+   volatile uint32_t RXDAT;
+   volatile uint32_t RXDATSTAT;
+   volatile uint32_t TXDAT;
+   volatile uint32_t BRG;
+   volatile uint32_t INTSTAT;
+   volatile uint32_t OSR;
+   volatile uint32_t ADDR;
+}USARTs;
 
 
 #define USART0_BASE		(0x040064000u)
 #define USART0      	((USARTs *)USART0_BASE)
-
+//
+//ESTO AGREGUE YO...
 #define USART1_BASE		(0x040068000u)
 #define USART1      	((USARTs *)USART1_BASE)
-
 #define USART2_BASE		(0x04006C000u)
 #define USART2      	((USARTs *)USART2_BASE)
-
 #define USART3_BASE		(0x040070000u)
 #define USART3      	((USARTs *)USART3_BASE)
-
 #define USART4_BASE		(0x040074000u)
 #define USART4      	((USARTs *)USART4_BASE)
 
+//CLAVE PARA SABER LOS SALTOS DE OFFSET EN BYTES: AL REGISTRO MAS CHICO SUMARLE LO QUE PESA Y RESTARLE EL RESULTADO AL REGISTRO MAS GRANDE - PASAR EL RESULTADO A DECIMAL...
+typedef struct{
+	 __IO uint32_t CFG;
+	 __IO uint32_t STAT;
+	 __IO uint32_t INTENSET;
+	 __O uint32_t INTENCLR;
+	 __IO uint32_t TIMEOUT;
+	 __IO uint32_t CLKDIV;
+	 __I uint32_t INTSTAT;
+	 uint8_t NO_ACCESS_1[4]; //ENTRE INTSTAT Y MSTCTL HAY UN OFFSET DE 8 BYTES!
+	 __IO uint32_t MSTCTL;
+	 __IO uint32_t MSTTIME;
+	 __IO uint32_t MSTDAT;
+	 uint8_t NO_ACCESS_2[20]; //ENTRE MSTDAT Y SLVCTL HAY UN OFFSET DE 18 BYTES!
+	 __IO uint32_t SLVCTL;
+	 __IO uint32_t SLVDAT;
+	 __IO uint32_t SLVADR0;
+	 __IO uint32_t SLVADR1;
+	 __IO uint32_t SLVADR2;
+	 __IO uint32_t SLVADR3;
+	 __IO uint32_t SLVQUAL0;
+	 uint8_t NO_ACCESS_3[36]; //FALTABA ESTO!
+	 __I uint32_t MONRXDAT;
+}I2C;
+
+#define I2C0CLKSEL     (*((uint32_t *)0x400480A4u))
+#define I2C1CLKSEL     (*((uint32_t *)0x400480A8u))
+#define I2C2CLKSEL     (*((uint32_t *)0x400480ACu))
+#define I2C3CLKSEL     (*((uint32_t *)0x400480B0u))
+
+#define I2C0_BASE  (0x40050000u)
+#define I2C0 ((I2C *)I2C0_BASE)
+#define I2C1_BASE  0x40054000u
+#define I2C1 ((I2C *)I2C1_BASE)
+#define I2C2_BASE  0x40030000u
+#define I2C2 ((I2C *)I2C2_BASE)
+#define I2C3_BASE  0x40034000u
+#define I2C3 ((I2C *)I2C3_BASE)
 
 
+//
 #define PINASSIGN0		(*((uint32_t *)0x04000C000u))
 #define PINASSIGN1		(*((uint32_t *)0x04000C004u))
 #define PINASSIGN2		(*((uint32_t *)0x04000C008u))
@@ -379,6 +415,35 @@ typedef struct {
 #define	UART3CLKSEL		(*((uint32_t *)0x04004809Cu))
 #define	UART4CLKSEL		(*((uint32_t *)0x0400480A0u))
 
+typedef struct{
+	__IO uint32_t IR;
+	__IO uint32_t TCR;
+	__IO uint32_t TC;
+	__IO uint32_t PR;
+	__IO uint32_t PC;
+	__IO uint32_t MCR;
+	__IO uint32_t MR0;
+	__IO uint32_t MR1;
+	__IO uint32_t MR2;
+	__IO uint32_t MR3;
+	__IO uint32_t CCR;
+	__I uint32_t CR0;
+	__I uint32_t CR1;
+	__I uint32_t CR2;
+	__I uint32_t CR3;
+	__IO uint32_t EMR;
+	uint8_t RESERVED[48];
+	__IO uint32_t CTCR;
+	__IO uint32_t PWMC;
+	__IO uint32_t MSR0;
+	__IO uint32_t MSR1;
+	__IO uint32_t MSR2;
+	__IO uint32_t MSR3;
+}CTIMER_TYPE;
+
+#define CTIMER_BASE (0x40038000u)
+#define CTIMER ((CTIMER_TYPE *)CTIMER_BASE)
+//HASTA ACA...
 typedef struct {
   __IO uint32_t CTRL;
   __IO uint32_t RESERVED;
@@ -408,7 +473,6 @@ typedef struct {
   __IO uint32_t INTEN;
   __IO uint32_t FLAGS;
   __IO uint32_t TRM;
-
 } ADC_Types;
 
 

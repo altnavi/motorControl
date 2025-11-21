@@ -18,8 +18,9 @@ void InitSystick ( void )
 
 void SysTick_Handler (void)
 {
-	for (int i = 0 ; i < PerifericoTemporizado::cant_pt ; i++)
-		perifericosTemp[i]->handler();
+		for (int i = 0 ; i < PerifericoTemporizado::cant_pt ; i++)
+			perifericosTemp[i]->handler();
+
 }
 
 
