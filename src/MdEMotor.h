@@ -12,41 +12,55 @@
 #include <gpio.h>
 #include <Timer.h>
 #include <driverMotor.h>
+#include <detectorGiro.h>
+#include <Temperatura.h>
 
 void MdEMotor (void);
 void InicializarMdE (void);
 void handler_RPMtimer();
 void handler_alarmatimer();
 void handler_actualizarDatos();
+void buzzer_intermitente();
 
 extern Timer RPMtimer;
 extern Timer alarmatimer;
-extern Timer actualizarDatos;		//usado para refrescar datos en pantalla
+extern Timer actualizarDatos;        // usado para refrescar datos en pantalla
+extern Timer buzzer_inter;
 
 extern driverMotor motor1;
+extern DetectorGiro d1;
+extern Temperatura t1;
 
 extern gpio botonArranque;
 extern gpio botonParada;
 extern gpio botonVelocidad;
-//extern gpio botonVelocidad_mas;
-//extern gpio botonVelocidad_menos;
 extern gpio botonCambioSentido;
 extern gpio cambioSentido;
-//extern gpio pulso;
 extern gpio led;
 extern gpio alarma;
 
 extern uint32_t velocidad;
-extern uint8_t sentido_giro;
+
+// --- SENTIDO: SEPARAR ORDEN Y DETECCIÓN ---
+extern uint8_t sentido_giro;       // Orden de control
+extern uint8_t sentido_detectado;  // Lo que detecta el sensor
+
+extern uint32_t rpm;
+extern float temperatura_motor;
+
+// Flags generados por la MDE WiFi o timers (NO ISR)
 extern bool flag_RPMtimer;
 extern bool flag_alarmatimer;
-extern bool flag_actualizarDatos;
+extern bool flag_sentido;
+extern bool flag_boton_inicio;
+extern bool flag_boton_parada;
+extern bool flag_velocidad;
 
-#define DETENIDO			0
-#define	GIRANDO				1
-#define	FALLA_INTERMITENTE	2
-#define	FALLA_CONTINUA		3
-
-
+// Estados
+#define DETENID             0
+#define GIRANDO             1
+#define FALLA_INTERMITENTE  2
+#define FALLA_CONTINUA      3
 
 #endif /* MDEMOTOR_H_ */
+

@@ -182,24 +182,22 @@ void miCallbackDeResultado(AT_Result resultado) {
 }
 
  void procesarMensajeCliente(const char* data) {
-    if (strcmp(data, "motor_ON") == 0) {
-        motor1.encenderMotor();
+    if (strcmp(data, "motor_ON") == 0)
+    {
+    	flag_boton_inicio = true;
         pc.Transmitir((uint8_t*)"motor encendido\r\n", 15);
-    } else if (strcmp(data, "motor_OFF") == 0) {
-    	motor1.apagarMotor();
+    }
+    else if (strcmp(data, "motor_OFF") == 0)
+    {
+    	flag_boton_parada = true;
         pc.Transmitir((uint8_t*)"motor apagado\r\n", 13);
-    } else if (strncmp(data, "RPM=", 4) == 0) {
-        //rpm = atoi(data + 4);
-        //char buffer_respuesta[40];
-        //sprintf(buffer_respuesta, "RPM objetivo actualizado a: %d\r\n", rpm);
-        //pc.Transmitir((uint8_t*)buffer_respuesta, strlen(buffer_respuesta));
     }
     else if(strcmp(data, "aumentar") == 0) //aumenta la velocidad del motor
 	{
     	if(velocidad>0)
     	velocidad--;
 
-    	motor1.setVelocidad(velocidad);
+    	flag_velocidad = true;
     	pc.Transmitir((uint8_t*)"velocidad aumentada\r\n", 22);
 
 	}
@@ -208,17 +206,13 @@ void miCallbackDeResultado(AT_Result resultado) {
     	if(velocidad<5)
     	velocidad++;
 
-    	motor1.setVelocidad(velocidad);
+    	flag_velocidad = true;
     	pc.Transmitir((uint8_t*)"velocidad disminuida\r\n", 22);
 	}
-    else if(strcmp(data, "invertir") == 0) //disminuye la velocidad del motor
+    else if(strcmp(data, "invertir") == 0) //invierte el giro del motor
 	{
-    	if(sentido_giro==DetectorGiro::ANTIHORARIO)
-    		motor1.setSentido(DetectorGiro::HORARIO);
-    	else
-    		motor1.setSentido(DetectorGiro::ANTIHORARIO);
-
-    	pc.Transmitir((uint8_t*)"velocidad disminuida\r\n", 22);
+    	flag_sentido = true;
+    	pc.Transmitir((uint8_t*)"giro invertido\r\n", 22);
 	}
 	else
 	{

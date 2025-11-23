@@ -12,7 +12,7 @@
 
 class bufferCirc {
 
-	uint8_t buffer[128];
+	uint8_t buffer[256];
 	uint8_t tam;
 
 	uint8_t in,out;

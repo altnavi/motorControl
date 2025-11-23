@@ -5,7 +5,7 @@ static I2C_COM* i2c_global[4] = { nullptr, nullptr, nullptr, nullptr };
 static gpio debugPin(1, 2, gpio::SALIDA, gpio::LOW);
 
 I2C_COM::I2C_COM(uint8_t nro,uint8_t sda_pin,uint8_t scl_pin,uint8_t slave)
-    : buffer_tx(64),
+    : buffer_tx(256), // Buffer aumentado a 256 para LCD
       VCC(1,5,gpio::SALIDA,gpio::HIGH),
       SDA_PIN(sda_pin),
       SCL_PIN(scl_pin),
@@ -28,7 +28,6 @@ I2C_COM::I2C_COM(uint8_t nro,uint8_t sda_pin,uint8_t scl_pin,uint8_t slave)
     VCC.setPIN();
 
     // --- Configuración de pines según I2C ---
-    // (igual que tu código original, solo corregidos comentarios y orden)
     SYSCON->SYSAHBCLKCTRL0 |= (1 << 7); // habilito switch matrix
 
     if(nro == 0){
@@ -99,12 +98,9 @@ I2C_COM::I2C_COM(uint8_t nro,uint8_t sda_pin,uint8_t scl_pin,uint8_t slave)
 
     // Habilitar maestro
     i2c_direccion->CFG |= 1;
-
-    // No habilito IRQ del NVIC aquí, solo cuando enviamos.
 }
 
 I2C_COM::~I2C_COM(){
-    // Nada en particular (bufferCirc se destruye solo)
 }
 
 // =======================================================
@@ -115,7 +111,7 @@ void I2C_COM::write(uint8_t byte)
 {
     if(!buffer_tx.push(byte)) return;
 
-    if(start) return; // Si ya está andando, solo cargamos al buffer
+    if(start) return;
 
     if(buffer_tx.available() == 0) return;
 
@@ -125,30 +121,29 @@ void I2C_COM::write(uint8_t byte)
     // 1. Cargar dirección y bit de escritura
     i2c_direccion->MSTDAT = (slave_address << 1);
     // 2. Iniciar la transacción (START)
-    i2c_direccion->MSTCTL = 0x02; // Bit 1 = Start (0x02 es Start normal, 0x01 es Continue)
-    // NOTA: En LPC845, escribir 1 en bit 1 de MSTCTL fuerza el START.
+    i2c_direccion->MSTCTL = 0x02;
 
-    // 3. Habilitar Interrupción
-    i2c_direccion->INTENSET = (1 << 0); // MSTPENDINGEN
+    // 3. Habilitar Interrupción (MSTPENDINGEN)
+    // IMPORTANTE: Habilitamos la IRQ solo cuando empezamos a transmitir
+    i2c_direccion->INTENSET = 1;
 
-    // 4. Habilitar NVIC (Usar |= para no borrar otras interrupciones)
+    // 4. Habilitar NVIC
     ISER0 |= (1 << (8 + nro_i2c));
 }
 
 void I2C_COM::I2C_handler()
 {
-    // CORRECCIÓN 1: Leer el estado correctamente (bits 3:1)
+    // Leer estado (bits 3:1)
     uint8_t stat = (i2c_direccion->STAT >> 1) & 0x07;
 
-    // Definiciones de estado según manual LPC845 (valores decimales tras el shift)
     const uint8_t I2C_STAT_IDLE = 0;
     const uint8_t I2C_STAT_RXRDY = 1;
     const uint8_t I2C_STAT_TXRDY = 2;
     const uint8_t I2C_STAT_NACK_ADDR = 3;
     const uint8_t I2C_STAT_NACK_DATA = 4;
 
-    // Debug: Parpadear LED para ver vida
-    if(stat == I2C_STAT_TXRDY) debugPin.togglePIN(); // Toggle
+    // Debug
+    if(stat == I2C_STAT_TXRDY) debugPin.togglePIN();
 
     switch(stat)
     {
@@ -159,6 +154,10 @@ void I2C_COM::I2C_handler()
                 i2c_direccion->MSTCTL = 0x02; // Start
                 start = true;
             } else {
+                // --- SOLUCIÓN CRÍTICA AL CONGELAMIENTO ---
+                // Si no hay más datos y el bus está libre, APAGAMOS la interrupción.
+                // Si no haces esto, la IRQ se dispara infinitamente y cuelga el main.
+                i2c_direccion->INTENCLR = 1;
                 start = false;
             }
         break;
@@ -173,26 +172,26 @@ void I2C_COM::I2C_handler()
             }
             else
             {
-                i2c_direccion->MSTCTL = 0x04; // Stop (Bit 2)
+                i2c_direccion->MSTCTL = 0x04; // Stop
                 start = false;
+                // Al hacer STOP, el hardware pasará a IDLE y disparará una IRQ más.
+                // Esa última IRQ caerá en el case IDLE de arriba y se apagará sola.
             }
         }
         break;
 
-        case I2C_STAT_NACK_ADDR: // (Estado 3)
-        case I2C_STAT_NACK_DATA: // (Estado 4)
+        case I2C_STAT_NACK_ADDR:
+        case I2C_STAT_NACK_DATA:
             i2c_direccion->MSTCTL = 0x04; // Stop
             start = false;
-            debugPin.clrPIN(); // Apagar LED si falla
+            debugPin.clrPIN();
         break;
 
         default:
-            // Si pasa algo raro, Stop por seguridad
              i2c_direccion->MSTCTL = 0x04;
+             start = false;
         break;
     }
-
-    // Limpiar flag de interrupción si fuera necesario (en I2C LPC845 suele ser automático al escribir MSTCTL)
 }
 
 // =======================================================

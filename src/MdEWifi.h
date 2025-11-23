@@ -80,4 +80,9 @@ extern uint32_t rpm;
 extern uint32_t velocidad;
 extern uint8_t sentido_giro;
 
+extern bool flag_boton_inicio;
+extern bool flag_velocidad;
+extern bool flag_sentido;
+extern bool flag_boton_parada;
+
 #endif /* MDEWIFI_H_ */

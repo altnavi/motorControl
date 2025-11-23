@@ -16,11 +16,15 @@ void handler_invertir();
 
 class driverMotor {
 private:
+
 	Timer t1; //timer para generar los pulsos al driver del motor
 	Timer t_sentido; //para frenar el motor e invertir el giro
 	gpio gpio_motor;
 	gpio sentidoGiro;
+	bool funcionando;
+
 public:
+
 	driverMotor(gpio _motor,gpio _sentido);
 	void setSentido(bool sentido);
 	void setVelocidad(uint8_t);

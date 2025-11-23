@@ -16,6 +16,7 @@ gpio_motor(_motor)
 {
 	sentidoGiro = _sentido;
 	p_motor=this;
+	funcionando = false;
 
 }
 
@@ -34,20 +35,31 @@ encenderMotor();
 
 void driverMotor::encenderMotor()
 {
+	if(!funcionando)
+	{
+	funcionando = true;
 	t1.start();
+	}
 }
 
 void driverMotor::apagarMotor()
 {
+	if(funcionando)
+	{
 	t1.stop();
 	gpio_motor.clrPIN();
+	funcionando = false;
+	}
 }
 
 void driverMotor::setSentido(bool sentido)
 {
-	apagarMotor();
-	sentidoGiro.togglePIN();
-	t_sentido.start();
+	if(funcionando)
+	{
+		apagarMotor();
+		sentidoGiro.togglePIN();
+		t_sentido.start();
+	}
 }
 
 void handler_motor()

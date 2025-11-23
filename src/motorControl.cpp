@@ -17,12 +17,10 @@
 #include <Temperatura.h>
 #include "StringFormatter.h"
 #include <i2cCom.h>
-#include <stdio.h>
-
+#include <LcdI2C.h>
 
 void actualizarGUI();
-void lcd_sendCmd(I2C_COM &i2c, uint8_t cmd);
-
+void actDisplay();
 
 #define gpio_botonArranque 0,0
 #define gpio_botonParada 0,0
@@ -30,7 +28,7 @@ void lcd_sendCmd(I2C_COM &i2c, uint8_t cmd);
 #define gpio_botonCambioSentido 0,0
 #define gpio_cambioSentido 0,18
 #define gpio_led_falla 0,0
-#define gpio_alarma 0,0
+#define gpio_alarma 0,13
 #define gpio_motor 0,19
 #define gpio_sensor1 0,16
 #define gpio_sensor2 0,17
@@ -48,144 +46,117 @@ gpio cambioSentido(gpio_cambioSentido,gpio::SALIDA, gpio::HIGH);
 gpio led(gpio_led_falla,gpio::SALIDA, gpio::HIGH);
 gpio alarma(gpio_alarma,gpio::SALIDA, gpio::HIGH);
 gpio motor(gpio_motor,gpio::SALIDA, gpio::HIGH);
-//BOTONES
+
+// BOTONES
 DigitalInput bot(0, 4);
-//COMUNICACION SERIE
+
+// COMUNICACION SERIE
 serialCom esp(1, 115200, 8, 9);
 serialCom pc(0, 115200, 25, 24);
-//TIMERS
+
+// TIMERS
 Timer led_wifi_inter(300, wifi_intermitente_handler);
 Timer handler_envio_datos(1000, actualizarGUI);
-
-Timer RPMtimer(1000,handler_RPMtimer);
-Timer alarmatimer(1000,handler_alarmatimer);
-Timer actualizarDatos(1000,handler_actualizarDatos);
-//VARIABLES
+Timer RPMtimer(4000,handler_RPMtimer);
+Timer alarmatimer(3000,handler_alarmatimer);
+Timer actualizarDatos(800,handler_actualizarDatos);
+Timer buzzer_inter(100, buzzer_intermitente);
+// VARIABLES
 uint32_t rpm;
-char buffer_envio[TAMANO_BUFFER_ENVIO]; // Buffer para crear los mensajes JSON
+char buffer_envio[TAMANO_BUFFER_ENVIO];
 float temperatura_motor = 0;
 
 uint32_t velocidad;
-uint8_t sentido_giro = 2;
-bool flag_RPMtimer;
-bool flag_alarmatimer = false;
-bool flag_actualizarDatos;
+uint8_t sentido_giro = 0;
 
-//MOTOR
+bool flag_RPMtimer = false;
+bool flag_alarmatimer = false;
+bool flag_actualizarDatos = false;
+bool flag_boton_inicio = false;
+bool flag_boton_parada = false;
+bool flag_velocidad = false;
+bool flag_sentido = false;
+
+uint8_t sentido_detectado = DetectorGiro::DETENIDO;
+
+
+// MOTOR
 driverMotor motor1(motor,cambioSentido);
 DetectorGiro d1(gpio_sensor1, gpio_sensor2);
-
 Temperatura t1(6);
 
-I2C_COM i2c;
 
+//DISPLAY
+I2C_COM i2c(0, 11, 10, 0x27);
+LcdI2C lcd(&i2c);
 
-// --- FUNCIONES AUXILIARES DE RETARDO (BLOQUEANTES) ---
-void delay_ms(uint32_t ms) {
-    for(volatile uint32_t i = 0; i < (ms); i++) { __asm("NOP"); }
-}
-
-// --- FUNCIONES DE BAJO NIVEL LCD ---
-void lcd_sendNibble(uint8_t nibble, uint8_t is_data) {
-    uint8_t byte = nibble & 0xF0;
-
-    byte |= 0x08; // Backlight ON (Bit 3)
-    if (is_data) byte |= 0x01; // RS = 1 para datos, 0 para comandos
-
-    // Pulse EN (Bit 2)
-    // 1. Enable High
-    i2c.write(byte | 0x04);
-    // 2. Enable Low (Latch)
-    i2c.write(byte & ~0x04);
-}
-
-void lcd_cmd(uint8_t cmd) {
-    lcd_sendNibble(cmd, 0);       // Parte alta
-    lcd_sendNibble(cmd << 4, 0);  // Parte baja
-}
-
-void lcd_data(uint8_t data) {
-    lcd_sendNibble(data, 1);      // Parte alta
-    lcd_sendNibble(data << 4, 1); // Parte baja
-}
-
-void lcd_init() {
-    //delay_ms(50); // Esperar a que el voltaje se estabilice
-
-    // Secuencia mágica de inicialización (Modo 4 bits)
-    lcd_sendNibble(0x30, 0); delay_ms(5);
-    lcd_sendNibble(0x30, 0); delay_ms(1);
-    lcd_sendNibble(0x30, 0); delay_ms(1);
-    lcd_sendNibble(0x20, 0); delay_ms(1); // Set 4-bit mode
-
-    // Configuración
-    lcd_cmd(0x28); // Function set: 4-bit, 2 lines, 5x8 dots
-    delay_ms(1);
-    lcd_cmd(0x0C); // Display ON, Cursor OFF, Blink OFF
-    delay_ms(1);
-    lcd_cmd(0x01); // Clear Display
-    delay_ms(2);
-    lcd_cmd(0x06); // Entry mode: Increment cursor
-}
-
-void lcd_print(const char* str) {
-    while (*str) {
-        lcd_data(*str++);
-    }
-}
-
-void lcd_printInt(int num) {
-    char buffer[16];
-    // snprintf convierte el int a una cadena de texto
-    snprintf(buffer, sizeof(buffer), "%d", num);
-    lcd_print(buffer);
-}
-
-void lcd_setCursor(uint8_t col, uint8_t row) {
-    uint8_t offset[] = {0x00, 0x40, 0x14, 0x54};
-    lcd_cmd(0x80 | (col + offset[row]));
-}
 
 int main(void) {
 	Inicializar();
-
 	InicializarMdE();
     Wifi_Init();
+
     handler_envio_datos.start();
 
-    lcd_init();
+    lcd.init(16, 2);
+
+    lcd.setCursor(0, 0);
+    lcd.print("Estado:");
+
+        // Opcional: Escribir algo en la linea 2 mientras esperamos datos
+    lcd.setCursor(0, 1);
+    lcd.print("Esperando...");
+
 
     while(1) {
+    	MdEMotor();
         Wifi_Manejar();
         d1.procesar();
-        MdEMotor();
+
     }
 
     return 0;
 }
 
-void actualizarGUI() //actualizamos datos de la interfaz grafica
+void actDisplay()
 {
-    lcd_setCursor(0, 0);
-    lcd_print("Hola Mundo!");
-    lcd_setCursor(0, 1);
-    lcd_print("RPM:");
-    lcd_print("123");
-	lcd_setCursor(5, 1);
-    lcd_printInt(123);
+	lcd.setCursor(8,0);
+	if(flag_alarmatimer)
+	{
+		lcd.print("     ");
+		lcd.setCursor(8,0);
+		lcd.print("FALLA");
+	}
+	else
+	{
+		lcd.print("     ");
+		lcd.setCursor(8,0);
+		lcd.print("OK");
+	}
 
-	rpm = d1.getRPM();
-	sentido_giro = d1.getSentidoGiro();
-	temperatura_motor = t1.getTemperatura();
+    lcd.setCursor(0, 1);
+    lcd.print("RPM: ");
+    lcd.print(rpm);
+    lcd.print("    "); // limpiar restos
+
+
+    lcd.setCursor(9,1);
+    lcd.print("T: ");
+    lcd.print(temperatura_motor);
+}
+
+void actualizarGUI()
+{
+	static uint8_t contador = 0;
 
 	if (Wifi_EstaOcupado()) {
-	        handler_envio_datos.start(); // Reintentar más tarde
-	        return;
-	    }
+	    handler_envio_datos.start();
+	    return;
+	}
 
 	int bytes_escritos = formato_json_economico(
 	    buffer_envio,
-	    TAMANO_BUFFER_ENVIO, // Seguridad contra desbordamiento
+	    TAMANO_BUFFER_ENVIO,
 	    rpm,
 	    temperatura_motor,
 	    sentido_giro,
@@ -194,18 +165,19 @@ void actualizarGUI() //actualizamos datos de la interfaz grafica
 
 	if (bytes_escritos > 0)
     {
-        if(!Wifi_EnviarDato(buffer_envio)) //realizamos el envio de datos solo si estamos conectados
+        if(!Wifi_EnviarDato(buffer_envio))
         {
-            pc.Transmitir((uint8_t*)"WARN: WiFi ocupado, reintentando...\r\n", 37);
+        		//no hago nada por el momento si esta ocupado
         }
     }
-    else
-    {
-        pc.Transmitir((uint8_t*)"ERROR: Buffer de envío demasiado pequeño!\r\n", 40);
-    }
+
+	if(contador>=2)
+	{
+		actDisplay();
+		contador=0;
+	}
+
+	contador++;
 
 	handler_envio_datos.start();
 }
-
-
-
