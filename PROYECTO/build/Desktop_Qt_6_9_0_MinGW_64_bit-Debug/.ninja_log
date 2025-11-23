@@ -1,0 +1,15 @@
+# ninja log v6
+11	1012	7835364064475862	PROYECTO_autogen/timestamp	1bfe77b5a6b8096b
+11	1012	7835364064475862	PROYECTO_autogen/mocs_compilation.cpp	1bfe77b5a6b8096b
+11	1012	7835364064475862	C:/Users/Usuario/Documents/motorControl/PROYECTO/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PROYECTO_autogen/timestamp	1bfe77b5a6b8096b
+11	1012	7835364064475862	C:/Users/Usuario/Documents/motorControl/PROYECTO/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PROYECTO_autogen/mocs_compilation.cpp	1bfe77b5a6b8096b
+1026	3834	7835364065865478	CMakeFiles/PROYECTO.dir/main.cpp.obj	b4488aeee3a78316
+1021	3972	7835364065815413	CMakeFiles/PROYECTO.dir/PROYECTO_autogen/mocs_compilation.cpp.obj	3002a40d2d2e4578
+1031	4768	7835364065920425	CMakeFiles/PROYECTO.dir/mainwindow.cpp.obj	1001ef287f2cef51
+4769	5273	7835364103296541	PROYECTO.exe	87752b96b5e675c4
+65	322	7835366103702702	PROYECTO_autogen/timestamp	1bfe77b5a6b8096b
+65	322	7835366103702702	PROYECTO_autogen/mocs_compilation.cpp	1bfe77b5a6b8096b
+65	322	7835366103702702	C:/Users/Usuario/Documents/motorControl/PROYECTO/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PROYECTO_autogen/timestamp	1bfe77b5a6b8096b
+65	322	7835366103702702	C:/Users/Usuario/Documents/motorControl/PROYECTO/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PROYECTO_autogen/mocs_compilation.cpp	1bfe77b5a6b8096b
+324	4557	7835366106293140	CMakeFiles/PROYECTO.dir/mainwindow.cpp.obj	1001ef287f2cef51
+4557	4901	7835366148624479	PROYECTO.exe	87752b96b5e675c4
