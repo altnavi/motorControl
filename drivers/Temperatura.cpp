@@ -12,11 +12,8 @@ Temperatura::Temperatura(uint8_t canal) : A1(canal){
 }
 
 float Temperatura::getTemperatura() {
-    // --- CÁLCULO DE RESISTENCIA ---
 
-    // Asumimos que la lectura del ADC (cuentas) ya está en 'cuentas'
-    // Cuentas de ejemplo (2500, ajustar según tu main/ADC)
-    cuentas = A1.getValor(); 							//DEBE SER EL VALOR "RESULTADO" DE ADC.CPP
+    cuentas = A1.getValor();
 
     float adc = cuentas;
     float vout = adc*(vref/adc_res);

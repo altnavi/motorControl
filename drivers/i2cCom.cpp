@@ -5,7 +5,7 @@ static I2C_COM* i2c_global[4] = { nullptr, nullptr, nullptr, nullptr };
 static gpio debugPin(1, 2, gpio::SALIDA, gpio::LOW);
 
 I2C_COM::I2C_COM(uint8_t nro,uint8_t sda_pin,uint8_t scl_pin,uint8_t slave)
-    : buffer_tx(256), // Buffer aumentado a 256 para LCD
+    : buffer_tx(255), // Buffer aumentado a 256 para LCD
       VCC(1,5,gpio::SALIDA,gpio::HIGH),
       SDA_PIN(sda_pin),
       SCL_PIN(scl_pin),

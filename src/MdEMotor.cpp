@@ -10,35 +10,27 @@
 void InicializarMdE (void)
 {
 	motor1.apagarMotor();
-	led.clrPIN();
 	alarma.clrPIN();
 
 	sentido_giro = DetectorGiro::DETENIDO;
 	motor1.setSentido(sentido_giro);
 
-
+	buzzer_inter.stop();
 	RPMtimer.stop();
 	alarmatimer.stop();
-
 
 	actualizarDatos.start();
 }
 
-static uint8_t estadoski = DETENID;
 
 void MdEMotor (void)
 {
+	static uint8_t estado = DETENID;
 	static bool timer_activo = false;
 
-	switch (estadoski)
+	switch (estado)
 	{
 	case DETENID:
-		if(flag_velocidad)
-		{
-			motor1.setVelocidad(velocidad);
-			flag_velocidad = false;
-		}
-
 		if(flag_boton_inicio)
 		{
 			motor1.setSentido(sentido_giro);
@@ -48,7 +40,7 @@ void MdEMotor (void)
 			timer_activo = true;
 
 			flag_boton_inicio = false;
-			estadoski = GIRANDO;
+			estado = GIRANDO;
 		}
 		break;
 
@@ -59,12 +51,13 @@ void MdEMotor (void)
 			RPMtimer.stop();
 			timer_activo = false;
 			flag_boton_parada = false;
-			estadoski = DETENID;
+			estado = DETENID;
 		}
 		else if(flag_velocidad)
 		{
 			motor1.setVelocidad(velocidad);
 			flag_velocidad = false;
+			estado = GIRANDO;
 		}
 		else if(flag_sentido)
 		{
@@ -75,7 +68,7 @@ void MdEMotor (void)
 
 			motor1.setSentido(sentido_giro);
 			flag_sentido = false;
-			estadoski = GIRANDO;
+			estado = GIRANDO;
 		}
 
 		else if(rpm > 0)
@@ -99,59 +92,64 @@ void MdEMotor (void)
 			alarmatimer.start();
 			buzzer_inter.start();
 			flag_RPMtimer = false;
-			estadoski = FALLA_INTERMITENTE;
+			estado = FALLA_INTERM;
 		}
 		break;
 
-	case FALLA_INTERMITENTE:
-
+	case FALLA_INTERM:
 		if(flag_boton_parada)
 		{
 			flag_boton_parada = false;
 			motor1.apagarMotor();
 			alarmatimer.stop();
 			buzzer_inter.stop();
-			led.clrPIN();
 			alarma.clrPIN();
-			estadoski = DETENID;
+			estado = DETENID;
 		}
 		else if(rpm > 0)
 		{
 			alarmatimer.stop();
 			buzzer_inter.stop();
-			led.clrPIN();
 			alarma.clrPIN();
 
 			timer_activo = false;
 			flag_RPMtimer = false;
 
-			estadoski = GIRANDO;
+			estado = GIRANDO;
 		}
 
 		else if(flag_alarmatimer)
 		{
-			led.setPIN();
 			alarma.setPIN();
 			alarmatimer.stop();
 			buzzer_inter.stop();
 			motor1.apagarMotor();
-			estadoski = FALLA_CONTINUA;
+			estado = FALLA_CONT;
 		}
 		break;
 
-	case FALLA_CONTINUA:
+	case FALLA_CONT:
 		if(flag_boton_parada)
 		{
-			led.clrPIN();
 			alarma.clrPIN();
 			flag_boton_parada = false;
 			flag_alarmatimer = false;
-			estadoski = DETENID;
+			estado = DETENID;
 		}
 		break;
 
 	default:
+		motor1.apagarMotor();
+		alarma.clrPIN();
 
+		sentido_giro = DetectorGiro::DETENIDO;
+		motor1.setSentido(sentido_giro);
+
+		buzzer_inter.stop();
+		RPMtimer.stop();
+		alarmatimer.stop();
+
+		actualizarDatos.start();
 		break;
 	}
 }

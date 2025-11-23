@@ -31,17 +31,11 @@ extern driverMotor motor1;
 extern DetectorGiro d1;
 extern Temperatura t1;
 
-extern gpio botonArranque;
-extern gpio botonParada;
-extern gpio botonVelocidad;
-extern gpio botonCambioSentido;
 extern gpio cambioSentido;
-extern gpio led;
 extern gpio alarma;
 
 extern uint32_t velocidad;
 
-// --- SENTIDO: SEPARAR ORDEN Y DETECCIÓN ---
 extern uint8_t sentido_giro;       // Orden de control
 extern uint8_t sentido_detectado;  // Lo que detecta el sensor
 
@@ -59,8 +53,8 @@ extern bool flag_velocidad;
 // Estados
 #define DETENID             0
 #define GIRANDO             1
-#define FALLA_INTERMITENTE  2
-#define FALLA_CONTINUA      3
+#define FALLA_INTERM 		2
+#define FALLA_CONT      	3
 
 #endif /* MDEMOTOR_H_ */
 

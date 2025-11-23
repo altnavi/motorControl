@@ -22,12 +22,7 @@
 void actualizarGUI();
 void actDisplay();
 
-#define gpio_botonArranque 0,0
-#define gpio_botonParada 0,0
-#define gpio_botonVelocidad 0,0
-#define gpio_botonCambioSentido 0,0
 #define gpio_cambioSentido 0,18
-#define gpio_led_falla 0,0
 #define gpio_alarma 0,13
 #define gpio_motor 0,19
 #define gpio_sensor1 0,16
@@ -38,12 +33,7 @@ void actDisplay();
 //  GPIOS
 gpio led_wifi_OK(1,0,gpio::SALIDA, gpio::LOW);
 gpio led_wifi_conectado(1,1,gpio::SALIDA, gpio::LOW);
-gpio botonArranque(gpio_botonArranque,gpio::ENTRADA, gpio::LOW);
-gpio botonParada(gpio_botonParada,gpio::ENTRADA, gpio::LOW);
-gpio botonVelocidad(gpio_botonVelocidad,gpio::ENTRADA, gpio::LOW);
-gpio botonCambioSentido(gpio_botonCambioSentido,gpio::ENTRADA, gpio::LOW);
 gpio cambioSentido(gpio_cambioSentido,gpio::SALIDA, gpio::HIGH);
-gpio led(gpio_led_falla,gpio::SALIDA, gpio::HIGH);
 gpio alarma(gpio_alarma,gpio::SALIDA, gpio::HIGH);
 gpio motor(gpio_motor,gpio::SALIDA, gpio::HIGH);
 
