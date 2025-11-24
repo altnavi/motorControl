@@ -45,17 +45,25 @@ void manejarComunicacionAT();
 
 
 // --- Máquina de Estados ---
-extern volatile AT_State estadoComando;
+extern AT_State estadoComando;
 extern Estado_wifi wifi_State;
-extern const char* comandoPendiente;
-extern uint32_t timeoutPendiente;
-extern at_callback_t comandoCallback;
-extern AT_Result resultado_AT;
-extern bool comunicacionOK;
 extern Estado_Envio_Wifi estadoEnvio;
+extern AT_Result resultado_AT;
+
+extern Timer timeout_timer;
+extern at_callback_t comandoCallback;
+
+extern uint32_t timeoutPendiente;
+extern uint16_t lenPayload;
+extern uint8_t bufferIndex;
+
+extern bool timeout_flag;
 extern bool cliente_conectado;
-extern driverMotor motor1;
-extern DetectorGiro d1;
+extern bool comunicacionOK;
+
+extern char bufferRespuesta[RESPUESTA_MAX_LEN];
+extern char bufferPayload[RESPUESTA_MAX_LEN];
+extern const char* comandoPendiente;
 
 // --- Buffer ---
 extern char bufferRespuesta[RESPUESTA_MAX_LEN];

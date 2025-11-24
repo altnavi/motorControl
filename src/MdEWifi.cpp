@@ -1,28 +1,32 @@
 #include "MdEWifi.h"
 
 ///INICIALIZACIONES
-volatile AT_State estadoComando = AT_IDLE;
+AT_State estadoComando = AT_IDLE;
 Estado_wifi wifi_State = WIFI_NONE;
-const char* comandoPendiente = NULL;
-uint32_t timeoutPendiente = 0;
-at_callback_t comandoCallback = NULL;
-AT_Result resultado_AT = AT_RESULT_NONE;
-bool comunicacionOK = false;
-char bufferRespuesta[RESPUESTA_MAX_LEN];
-uint8_t bufferIndex = 0;
-bool timeout_flag = false;
-Timer timeout_timer(1, timeout_handler);
 Estado_Envio_Wifi estadoEnvio = ENVIO_IDLE;
-char bufferPayload[RESPUESTA_MAX_LEN];
+AT_Result resultado_AT = AT_RESULT_NONE;
+
+Timer timeout_timer(1, timeout_handler);
+at_callback_t comandoCallback = NULL;
+
+uint32_t timeoutPendiente = 0;
 uint16_t lenPayload = 0;
+uint8_t bufferIndex = 0;
+
+bool timeout_flag = false;
 bool cliente_conectado = false;
+bool comunicacionOK = false;
+
+char bufferRespuesta[RESPUESTA_MAX_LEN];
+char bufferPayload[RESPUESTA_MAX_LEN];
+const char* comandoPendiente = NULL;
 
 //////////////////////
 
 
 bool Wifi_EstaOcupado() {
     // Devuelve true si la máquina de estados
-    // NO está en IDLE (WIFI_ENVIO_DATOS, etc.)
+    // NO está en IDLE
     return (wifi_State != WIFI_ENVIO_DATOS) || (estadoComando != AT_IDLE);
 }
 
@@ -42,7 +46,7 @@ void Wifi_Manejar(void) {
         static char comandoCipsend[32];
         int bytes_escritos = formato_cipsend_economico(
                     comandoCipsend,
-                    32, // <-- Le pasamos el tamaño para seguridad
+                    32, // Le pasamos el tamaño para seguridad
                     lenPayload
                 );
         if (bytes_escritos > 0) {
