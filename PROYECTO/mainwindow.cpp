@@ -95,21 +95,29 @@ void MainWindow::onDisconnected()
 void MainWindow::onReadyRead()
 {
     QByteArray datos = socket->readAll();
-    QJsonDocument doc = QJsonDocument::fromJson(datos);
-    if (doc.isNull() || !doc.isObject()) {
-        //qDebug() << "Error: No se recibió un JSON válido.";
+    qDebug() << "------------------------------------------------";
+    qDebug() << "DATOS CRUDOS:" << datos;
+
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(datos, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        qDebug() << "❌ ERROR JSON:" << parseError.errorString();
         return;
     }
 
-    // 3. Convertir el documento a un objeto JSON para poder acceder a sus claves
     QJsonObject objetoJson = doc.object();
+    qDebug() << "✅ JSON Valido. Claves:" << objetoJson.keys();
 
-    // 4. Extraer los valores usando las claves que definiste en el microcontrolador
-    if (objetoJson.contains("rpm") && objetoJson["rpm"].isDouble()) {
-        int rpm = objetoJson["rpm"].toInt();
-
-        // 5. Actualizar la interfaz gráfica
+    // Verificación de RPM relajada
+    if (objetoJson.contains("rpm")) {
+        QJsonValue val = objetoJson["rpm"];
+        int rpm = 0;
+        rpm = val.toInt();
         ui->lcdNumber->display(rpm);
+
+    } else {
+        qDebug() << "⚠️ El JSON no contiene la clave 'rpm'";
     }
 
     if (objetoJson.contains("temp") && objetoJson["temp"].isDouble()) {
@@ -120,11 +128,8 @@ void MainWindow::onReadyRead()
 
         ui->te_temp->setText(temp_s);
     }
-
-
-    if (objetoJson.contains("estado") && objetoJson["estado"].isBool()) {
-        bool estado = objetoJson["estado"].toBool();
-        qDebug() << "Estado:" << estado;
+    else {
+        qDebug() << "⚠️ El JSON no contiene la clave 'temp'";
     }
 
     if (objetoJson.contains("sentido") && objetoJson["sentido"].isDouble()) {
@@ -136,6 +141,9 @@ void MainWindow::onReadyRead()
         ui->te_sentido->setText("ANTIHORARIO");
         else if(estado == 2)
         ui->te_sentido->setText("DETENIDO");
+    }
+    else {
+        qDebug() << "⚠️ El JSON no contiene la clave 'sentido'";
     }
 
     if (objetoJson.contains("alarma") && objetoJson["alarma"].isBool()) {
@@ -163,6 +171,9 @@ void MainWindow::onReadyRead()
                 qDebug() << "✅ Alarma limpiada (Flag reseteado)";
             }
         }
+    }
+    else {
+        qDebug() << "⚠️ El JSON no contiene la clave 'alarma'";
     }
 }
 
