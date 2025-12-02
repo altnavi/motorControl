@@ -52,8 +52,7 @@ void Wifi_Manejar(void) {
         if (bytes_escritos > 0) {
                     iniciarEnvioComando(comandoCipsend, 3000, callback_CIPSEND);
                 } else {
-                    // El comando no cupo en el búfer de 32 bytes.
-                    // (sprintf se habría colgado aquí)
+                    // El comando no entro en el búfer de 32 bytes.
                     pc.Transmitir((uint8_t*)"ERROR: Buffer CIPSEND muy pequeño!\r\n", 36);
                 }
     }
@@ -156,7 +155,6 @@ void Wifi_Manejar(void) {
     }
 }
 
-// En MdEWifi.cpp
 
 bool Wifi_EnviarDato(const char* mensaje) {
     if (wifi_State != WIFI_ENVIO_DATOS || !cliente_conectado || estadoEnvio != ENVIO_IDLE) {
@@ -278,20 +276,12 @@ void miCallbackDeResultado(AT_Result resultado) {
 
 	         if (c == '\n') {
 	             bufferRespuesta[bufferIndex] = '\0';
-	             pc.Transmitir((uint8_t*)bufferRespuesta, bufferIndex); // Echo a la PC
+	             pc.Transmitir((uint8_t*)bufferRespuesta, bufferIndex);
 
-	             // --- INICIO DE LA CORRECCIÓN ---
-	             // "SEND OK" es un URC (Unsolicited Result Code) que esperamos
-	             // después de enviar un payload. Debe detectarse aquí.
 	             if (strstr(bufferRespuesta, "SEND OK") != NULL) {
-	                 // ¡Éxito! El payload fue recibido.
-	                 // Esta es la línea que completa el ciclo y arregla tu bug.
 	                 estadoEnvio = ENVIO_IDLE;
 	             }
-	             // --- FIN DE LA CORRECCIÓN ---
-
-	             // (El resto de tu lógica)
-	             else if (strstr(bufferRespuesta, "CONNECT") != NULL) { // Añadí 'else if'
+	             else if (strstr(bufferRespuesta, "CONNECT") != NULL) {
 	                 cliente_conectado = true;
 	                 pc.Transmitir((uint8_t*)"[INFO] Cliente Conectado.\r\n", 28);
 	             } else if (strstr(bufferRespuesta, "CLOSED") != NULL) {
@@ -348,22 +338,13 @@ void miCallbackDeResultado(AT_Result resultado) {
 
  void callback_CIPSEND(AT_Result resultado) {
       if (resultado == AT_RESULT_OK) {
-          // El comando fue aceptado (recibimos el '>')
-          // Ahora enviamos el payload (el mensaje real)
-          esp.Transmitir((uint8_t*)bufferPayload, lenPayload);
 
-          // --- CORRECCIÓN ---
-          // El envío NO ha terminado.
-          // Ahora estamos esperando que el ESP responda "SEND OK".
+          esp.Transmitir((uint8_t*)bufferPayload, lenPayload);
           estadoEnvio = ESPERANDO_SEND_OK;
-          // --- FIN CORRECCIÓN ---
 
       } else {
           // El comando falló, informamos el error
           pc.Transmitir((uint8_t*)"[ERROR] Falla en CIPSEND.\r\n", 28);
-
-          // Aquí SÍ vamos a IDLE, porque la transacción falló y se abortó.
           estadoEnvio = ENVIO_IDLE;
       }
-      // ¡Quitamos el 'estadoEnvio = ENVIO_IDLE;' de aquí fuera!
   }

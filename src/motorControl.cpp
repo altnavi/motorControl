@@ -126,7 +126,6 @@ int main(void) {
     lcd.setCursor(0, 0);
     lcd.print("Estado:");
 
-        // Opcional: Escribir algo en la linea 2 mientras esperamos datos
     lcd.setCursor(0, 1);
     lcd.print("Esperando..."); //espero hasta wifi conectado
 
