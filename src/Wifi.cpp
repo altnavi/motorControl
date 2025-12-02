@@ -1,4 +1,4 @@
-#include "MdEWifi.h"
+#include <Wifi.h>
 
 ///INICIALIZACIONES
 AT_State estadoComando = AT_IDLE;

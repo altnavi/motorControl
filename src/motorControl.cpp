@@ -11,13 +11,13 @@
 #include <LPC845.h>
 #include <driverMotor.h>
 #include <detectorGiro.h>
-#include <MdEWifi.h>
 #include <MdEMotor.h>
 #include <Timer.h>
 #include <Temperatura.h>
 #include <StringFormatter.h>
 #include <i2cCom.h>
 #include <LcdI2C.h>
+#include <Wifi.h>
 
 
 void actualizarGUI();

@@ -1,8 +1,5 @@
-/*
- * MdEWifi.h
- */
-#ifndef MDEWIFI_H_
-#define MDEWIFI_H_
+#ifndef WIFI_H_
+#define WIFI_H_
 
 #include <LPC845.h>
 #include <serialCom.h>
@@ -17,11 +14,8 @@
 #include "StringFormatter.h"
 
 
-// =================================================================
-// == TIPOS Y ENUMS GLOBALES
-// =================================================================
 #define RESPUESTA_MAX_LEN 128
-#define TAMANO_BUFFER_WIFI 128 // Debe ser igual (o mayor) a tu buffer_envio
+#define TAMANO_BUFFER_WIFI 128
 
 typedef enum { AT_RESULT_OK, AT_RESULT_ERROR, AT_RESULT_TIMEOUT, AT_RESULT_NONE } AT_Result;
 typedef enum { AT_IDLE, AT_SEND_COMMAND, AT_WAITING_RESPONSE } AT_State;
@@ -44,7 +38,7 @@ bool iniciarEnvioComando(const char* comando, uint32_t timeout_ms, at_callback_t
 void manejarComunicacionAT();
 
 
-// --- Máquina de Estados ---
+// Máquina de Estados
 extern AT_State estadoComando;
 extern Estado_wifi wifi_State;
 extern Estado_Envio_Wifi estadoEnvio;
@@ -65,17 +59,17 @@ extern char bufferRespuesta[RESPUESTA_MAX_LEN];
 extern char bufferPayload[RESPUESTA_MAX_LEN];
 extern const char* comandoPendiente;
 
-// --- Buffer ---
+// Buffer
 extern char bufferRespuesta[RESPUESTA_MAX_LEN];
 extern uint8_t bufferIndex;
 extern char bufferPayload[RESPUESTA_MAX_LEN];
 extern uint16_t lenPayload;
 
-// --- Timer ---
+// Timer
 extern bool timeout_flag;
 extern Timer timeout_timer;
 
-// --- Hardware ---
+// Hardware
 extern DigitalInput bot;
 extern gpio led_wifi_OK;
 extern gpio led_wifi_conectado;
@@ -83,7 +77,7 @@ extern serialCom esp;
 extern serialCom pc;
 extern Timer led_wifi_inter;
 
-// --- Datos de Aplicación ---
+// Datos de Aplicación
 extern uint32_t rpm;
 extern uint32_t velocidad;
 extern uint8_t sentido_giro;
@@ -93,4 +87,4 @@ extern bool flag_velocidad;
 extern bool flag_sentido;
 extern bool flag_boton_parada;
 
-#endif /* MDEWIFI_H_ */
+#endif /* WIFI_H_ */
