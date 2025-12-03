@@ -97,7 +97,7 @@ void Wifi_Manejar(void) {
                 } else if (resultado_AT == AT_RESULT_TIMEOUT || resultado_AT == AT_RESULT_ERROR) {
                     wifi_State = WIFI_FALLA;
                 } else {
-                    iniciarEnvioComando("AT+CWJAP=\"Personal-675\",\"GJtDPuJa8A\"\r\n", 10000, miCallbackDeResultado);
+                    iniciarEnvioComando("AT+CWJAP=\"motorola\",\"luciano123\"\r\n", 10000, miCallbackDeResultado);
                 }
             }
             break;

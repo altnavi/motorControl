@@ -1,9 +1,3 @@
-// Improved bufferCirc implementation
-// - push() returns bool (true = stored, false = buffer full)
-// - pop() unchanged (returns int16_t, NO_DATA = -1)
-// - added available(), freeSpace(), clear()
-// - internal array size is fixed; 'tam' defines used range
-
 #include <bufferCirc.h>
 
 bufferCirc::bufferCirc(uint8_t cant_bytes)
@@ -14,7 +8,6 @@ bufferCirc::bufferCirc(uint8_t cant_bytes)
     lleno = false;
 }
 
-// Returns true if stored, false if full
 bool bufferCirc::push(uint8_t dato)
 {
     if (lleno)

@@ -58,14 +58,14 @@ uint32_t DetectorGiro::getRPM()
     uint32_t tiempo_ultimo_pulso_local;
     uint32_t system_millis_local;
 
-    // --- Copia Atómica ---
+    //Copia Atómica
     disable_irq();
     periodo_local = this->periodo_ms;
     tiempo_ultimo_pulso_local = this->tiempo_ultimo_pulso_ms;
     system_millis_local = system_millis;
     enable_irq();
 
-    // --- Lógica de Timeout ---
+    // Lógica de Timeout
     uint32_t tiempo_desde_ultimo_pulso = system_millis_local - tiempo_ultimo_pulso_local;
 
     if (tiempo_desde_ultimo_pulso > TIMEOUT_MOTOR_DETENIDO_MS)
@@ -80,7 +80,7 @@ uint32_t DetectorGiro::getRPM()
         return 0; // Motor detenido
     }
 
-    // --- Filtro de Promedio Móvil ---
+    //Filtro de Promedio
     periodos_hist[idx_periodo++] = periodo_local;
     idx_periodo %= PROMEDIO;
 
@@ -93,7 +93,7 @@ uint32_t DetectorGiro::getRPM()
     if (promedio_periodo == 0)
         return 0;
 
-    // --- Cálculo Final de RPM ---
+    //Cálculo Final de RPM
     return (60000 / promedio_periodo) / 2;
 }
 
@@ -101,11 +101,6 @@ void DetectorGiro::handler(void)
 {
  system_millis++;
 }
-
-/**
- * Procesa los flags de las ISR, aplica debounce y ejecuta la lógica.
- * Debe ser llamado en el bucle principal.
- */
 
 void DetectorGiro::procesar()
 {
@@ -132,7 +127,6 @@ void DetectorGiro::procesar()
         }
     }
 
-    //Máquina de Estados (LÓGICA INVERTIDA)
 
     // Ruido: ambos pulsos a la vez. Resetear y salir.
     if (s1_valido && s2_valido)
@@ -141,7 +135,7 @@ void DetectorGiro::procesar()
         return;
     }
 
-    // --- Lógica de S1 ---
+    // Logica de S1
     if (s1_valido)
     {
         if (estado_encoder == 2) // CASO 1: Secuencia S2 -> S1
@@ -159,7 +153,7 @@ void DetectorGiro::procesar()
             estado_encoder = 0;
         }
     }
-    // --- Lógica de S2 ---
+    // Logica de S2
     else if (s2_valido)
     {
         if (estado_encoder == 1) // CASO 1: Secuencia S1 -> S2
@@ -187,14 +181,14 @@ void DetectorGiro::calcularPeriodo(uint32_t ahora)
 
     if (delta < TIMEOUT_MOTOR_DETENIDO_MS)
     {
-        // Protegemos la escritura de 'periodo_ms'
+        // Protegemos la escritura de periodo_ms
         disable_irq();
         this->periodo_ms = delta;
         enable_irq();
     }
 
-    // 'tiempo_ultimo_pulso_ms' solo se escribe aquí,
-    // pero 'getRPM' lo lee, así que también lo protegemos.
+    // tiempo_ultimo_pulso_ms solo se escribe aca,
+    // pero getRPM lo lee asi que tambien lo protegemos.
     disable_irq();
     this->tiempo_ultimo_pulso_ms = ahora;
     enable_irq();

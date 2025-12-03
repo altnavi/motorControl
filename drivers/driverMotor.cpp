@@ -1,10 +1,3 @@
-/*
- * driverMotor.cpp
- *
- *  Created on: 19 sep. 2025
- *      Author: Iván
- */
-
 #include <driverMotor.h>
 
 driverMotor * p_motor = nullptr;
